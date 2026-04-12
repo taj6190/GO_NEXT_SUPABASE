@@ -2,23 +2,25 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
 	"github.com/gonext-ecommerce/backend/internal/domain"
 	"github.com/gonext-ecommerce/backend/internal/utils"
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type CategoryService struct {
 	categoryRepo domain.CategoryRepository
-	rdb          *redis.Client
+	cache        *utils.CacheManager
 }
 
 func NewCategoryService(categoryRepo domain.CategoryRepository, rdb *redis.Client) *CategoryService {
-	return &CategoryService{categoryRepo: categoryRepo, rdb: rdb}
+	return &CategoryService{
+		categoryRepo: categoryRepo,
+		cache:        utils.NewCacheManager(rdb),
+	}
 }
 
 func (s *CategoryService) Create(ctx context.Context, input domain.CreateCategoryInput) (*domain.Category, error) {
@@ -91,14 +93,10 @@ func (s *CategoryService) Delete(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s *CategoryService) GetTree(ctx context.Context) ([]domain.Category, error) {
-	if s.rdb != nil {
-		cached, err := s.rdb.Get(ctx, "categories:tree").Result()
-		if err == nil {
-			var cats []domain.Category
-			if json.Unmarshal([]byte(cached), &cats) == nil {
-				return cats, nil
-			}
-		}
+	// Try cache first
+	var cachedCats []domain.Category
+	if err := s.cache.Get(ctx, "categories:tree", &cachedCats); err == nil {
+		return cachedCats, nil
 	}
 
 	cats, err := s.categoryRepo.GetTree(ctx)
@@ -106,10 +104,8 @@ func (s *CategoryService) GetTree(ctx context.Context) ([]domain.Category, error
 		return nil, err
 	}
 
-	if s.rdb != nil {
-		data, _ := json.Marshal(cats)
-		s.rdb.Set(ctx, "categories:tree", data, 30*time.Minute)
-	}
+	// Cache for 30 minutes
+	_ = s.cache.Set(ctx, "categories:tree", cats, 30*time.Minute)
 
 	return cats, nil
 }
@@ -119,8 +115,5 @@ func (s *CategoryService) List(ctx context.Context) ([]domain.Category, error) {
 }
 
 func (s *CategoryService) invalidateCache(ctx context.Context) {
-	if s.rdb == nil {
-		return
-	}
-	s.rdb.Del(ctx, "categories:tree")
+	_ = s.cache.Delete(ctx, "categories:tree")
 }

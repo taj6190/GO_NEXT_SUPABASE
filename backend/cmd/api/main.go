@@ -80,13 +80,13 @@ func main() {
 	productService := service.NewProductService(productRepo, rdb)
 	categoryService := service.NewCategoryService(categoryRepo, rdb)
 	cartService := service.NewCartService(cartRepo, productRepo)
-	orderService := service.NewOrderService(orderRepo, cartRepo, productRepo, couponRepo, paymentRepo, addressRepo)
+	orderService := service.NewOrderService(orderRepo, cartRepo, productRepo, couponRepo, paymentRepo, addressRepo, rdb)
 	paymentService := service.NewPaymentService(paymentRepo, orderRepo)
-	couponService := service.NewCouponService(couponRepo)
+	couponService := service.NewCouponService(couponRepo, rdb)
 	wishlistService := service.NewWishlistService(wishlistRepo)
 	addressService := service.NewAddressService(addressRepo)
 	uploadService := service.NewUploadService(cfg)
-	reviewService := service.NewReviewService(reviewRepo, productRepo)
+	reviewService := service.NewReviewService(reviewRepo, productRepo, rdb)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService, cartService)
@@ -110,9 +110,19 @@ func main() {
 	r.Use(middleware.CORSMiddleware(cfg.FrontendURL))
 	r.Use(middleware.RateLimitMiddleware(1000, time.Minute))
 
-	// Health check
+	// Health check endpoint with Redis status
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok", "time": time.Now().Format(time.RFC3339)})
+		redisStatus := "unavailable"
+		if rdb != nil {
+			if err := rdb.Ping(context.Background()).Err(); err == nil {
+				redisStatus = "ok"
+			}
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+			"time":   time.Now().Format(time.RFC3339),
+			"redis":  redisStatus,
+		})
 	})
 
 	api := r.Group("/api/v1")

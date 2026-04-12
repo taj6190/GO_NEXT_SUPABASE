@@ -1,7 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Product } from "@/lib/types";
-import { formatPrice, getDiscountPercent, getDisplayPrice, getEffectivePrice, getProductImage, hasVariants } from "@/lib/utils";
+import {
+  formatPrice,
+  getDiscountPercent,
+  getDisplayPrice,
+  getEffectivePrice,
+  getProductImage,
+  hasVariants,
+} from "@/lib/utils";
 import { useAuthStore, useCartStore } from "@/store";
 import { motion } from "framer-motion";
 import { ShoppingBag, Star } from "lucide-react";
@@ -16,7 +24,7 @@ interface Props {
 
 const stripHtml = (html: string) => {
   if (!html) return "";
-  return html.replace(/<[^>]*>?/gm, '');
+  return html.replace(/<[^>]*>?/gm, "");
 };
 
 export default function ProductCard({ product, index = 0 }: Props) {
@@ -38,7 +46,9 @@ export default function ProductCard({ product, index = 0 }: Props) {
   const discount = getDiscountPercent(product.price, product.discount_price);
   const isInStock = product.stock_quantity > 0;
 
-  const specs = product.attributes ? Object.entries(product.attributes).slice(0, 3) : [];
+  const specs = product.attributes
+    ? Object.entries(product.attributes).slice(0, 3)
+    : [];
 
   return (
     <motion.div
@@ -48,7 +58,6 @@ export default function ProductCard({ product, index = 0 }: Props) {
       className="h-full"
     >
       <div className="group relative flex flex-col h-full bg-white border border-gray-100 hover:shadow-[0_2px_15px_rgb(0,0,0,0.05)] transition-all duration-300 overflow-hidden">
-
         {/* Badges */}
         {discount > 0 ? (
           <div className="absolute top-1.5 right-1.5 z-10 bg-[#b91c1c] text-white text-[8.5px] px-1.5 py-0.5 font-bold rounded-sm tracking-wider uppercase shadow-sm">
@@ -61,7 +70,10 @@ export default function ProductCard({ product, index = 0 }: Props) {
         ) : null}
 
         {/* Image Container - Changed to contain */}
-        <Link href={`/products/${product.slug}`} className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden block shrink-0">
+        <Link
+          href={`/products/${product.slug}`}
+          className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden block shrink-0"
+        >
           <Image
             src={getProductImage(product)}
             alt={product.name}
@@ -91,13 +103,18 @@ export default function ProductCard({ product, index = 0 }: Props) {
           </Link>
 
           <p className="text-[10px] text-gray-400 line-clamp-1 leading-tight mb-2">
-            {product.description ? stripHtml(product.description) : "Premium configuration engineered for peak performance."}
+            {product.description
+              ? stripHtml(product.description)
+              : "Premium configuration engineered for peak performance."}
           </p>
 
           {/* Spec tags */}
           <div className="flex flex-wrap gap-1 mb-2">
             {specs.slice(0, 2).map(([key, value], idx) => (
-              <span key={idx} className="bg-gray-100/80 text-gray-500 text-[8.5px] font-semibold px-1.5 py-0.5 rounded-sm whitespace-nowrap">
+              <span
+                key={idx}
+                className="bg-gray-100/80 text-gray-500 text-[8.5px] font-semibold px-1.5 py-0.5 rounded-sm whitespace-nowrap"
+              >
                 {String(value).substring(0, 12)}
               </span>
             ))}
@@ -112,7 +129,9 @@ export default function ProductCard({ product, index = 0 }: Props) {
                   </span>
                 )}
                 <span className="text-[15px] font-extrabold text-gray-900 leading-none">
-                  {hasVariants(product) ? getDisplayPrice(product) : formatPrice(ep.current)}
+                  {hasVariants(product)
+                    ? getDisplayPrice(product)
+                    : formatPrice(ep.current)}
                 </span>
               </div>
 
@@ -132,14 +151,21 @@ export default function ProductCard({ product, index = 0 }: Props) {
               <div className="flex items-center gap-1">
                 <Star size={9} className="fill-[#facc15] text-[#facc15]" />
                 <span className="text-[9px] text-gray-500 font-medium">
-                  {product.average_rating ? Number(product.average_rating).toFixed(1) : "0"} ({product.review_count || 0})
+                  {product.average_rating
+                    ? Number(product.average_rating).toFixed(1)
+                    : "0"}{" "}
+                  ({product.review_count || 0})
                 </span>
               </div>
 
               {isInStock ? (
-                <span className="text-[#10b981] text-[9px] font-bold uppercase tracking-wide">In Stock</span>
+                <span className="text-[#10b981] text-[9px] font-bold uppercase tracking-wide">
+                  In Stock
+                </span>
               ) : (
-                <span className="text-red-500 text-[9px] font-bold uppercase tracking-wide">Out of Stock</span>
+                <span className="text-red-500 text-[9px] font-bold uppercase tracking-wide">
+                  Out of Stock
+                </span>
               )}
             </div>
           </div>

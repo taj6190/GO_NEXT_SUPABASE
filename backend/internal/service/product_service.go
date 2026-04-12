@@ -2,23 +2,25 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
 	"github.com/gonext-ecommerce/backend/internal/domain"
 	"github.com/gonext-ecommerce/backend/internal/utils"
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type ProductService struct {
 	productRepo domain.ProductRepository
-	rdb         *redis.Client
+	cache       *utils.CacheManager
 }
 
 func NewProductService(productRepo domain.ProductRepository, rdb *redis.Client) *ProductService {
-	return &ProductService{productRepo: productRepo, rdb: rdb}
+	return &ProductService{
+		productRepo: productRepo,
+		cache:       utils.NewCacheManager(rdb),
+	}
 }
 
 func (s *ProductService) Create(ctx context.Context, input domain.CreateProductInput) (*domain.Product, error) {
@@ -146,29 +148,23 @@ func (s *ProductService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Pro
 
 func (s *ProductService) GetBySlug(ctx context.Context, slug string) (*domain.Product, error) {
 	// Try cache first
-	if s.rdb != nil {
-		cacheKey := fmt.Sprintf("products:detail:%s", slug)
-		cached, err := s.rdb.Get(ctx, cacheKey).Result()
-		if err == nil {
-			var p domain.Product
-			if json.Unmarshal([]byte(cached), &p) == nil {
-				return &p, nil
-			}
-		}
+	cacheKey := fmt.Sprintf("products:detail:%s", slug)
+	var p domain.Product
+	if err := s.cache.Get(ctx, cacheKey, &p); err == nil {
+		return &p, nil
 	}
 
-	p, err := s.productRepo.GetBySlug(ctx, slug)
+	product, err := s.productRepo.GetBySlug(ctx, slug)
 	if err != nil {
 		return nil, err
 	}
 
-	// Cache the result
-	if s.rdb != nil && p != nil {
-		data, _ := json.Marshal(p)
-		s.rdb.Set(ctx, fmt.Sprintf("products:detail:%s", slug), data, 10*time.Minute)
+	// Cache the result for 10 minutes
+	if product != nil {
+		_ = s.cache.Set(ctx, cacheKey, product, 10*time.Minute)
 	}
 
-	return p, nil
+	return product, nil
 }
 
 func (s *ProductService) Update(ctx context.Context, id uuid.UUID, input domain.UpdateProductInput) (*domain.Product, error) {
@@ -312,14 +308,10 @@ func (s *ProductService) List(ctx context.Context, filter domain.ProductFilter) 
 }
 
 func (s *ProductService) GetFeatured(ctx context.Context, limit int) ([]domain.Product, error) {
-	if s.rdb != nil {
-		cached, err := s.rdb.Get(ctx, "products:featured").Result()
-		if err == nil {
-			var products []domain.Product
-			if json.Unmarshal([]byte(cached), &products) == nil {
-				return products, nil
-			}
-		}
+	// Try cache first
+	var cachedProducts []domain.Product
+	if err := s.cache.Get(ctx, "products:featured", &cachedProducts); err == nil {
+		return cachedProducts, nil
 	}
 
 	products, err := s.productRepo.GetFeatured(ctx, limit)
@@ -327,10 +319,8 @@ func (s *ProductService) GetFeatured(ctx context.Context, limit int) ([]domain.P
 		return nil, err
 	}
 
-	if s.rdb != nil {
-		data, _ := json.Marshal(products)
-		s.rdb.Set(ctx, "products:featured", data, 10*time.Minute)
-	}
+	// Cache the result for 10 minutes
+	_ = s.cache.Set(ctx, "products:featured", products, 10*time.Minute)
 
 	return products, nil
 }
@@ -340,11 +330,5 @@ func (s *ProductService) GetRelated(ctx context.Context, productID uuid.UUID, ca
 }
 
 func (s *ProductService) invalidateCache(ctx context.Context) {
-	if s.rdb == nil {
-		return
-	}
-	keys, _ := s.rdb.Keys(ctx, "products:*").Result()
-	if len(keys) > 0 {
-		s.rdb.Del(ctx, keys...)
-	}
+	_ = s.cache.DeletePattern(ctx, "products:*")
 }

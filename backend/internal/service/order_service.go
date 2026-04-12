@@ -6,9 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gonext-ecommerce/backend/internal/domain"
 	"github.com/gonext-ecommerce/backend/internal/utils"
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 )
 
@@ -19,6 +20,7 @@ type OrderService struct {
 	couponRepo  domain.CouponRepository
 	paymentRepo domain.PaymentRepository
 	addressRepo domain.AddressRepository
+	cache       *utils.CacheManager
 }
 
 func NewOrderService(
@@ -28,6 +30,7 @@ func NewOrderService(
 	couponRepo domain.CouponRepository,
 	paymentRepo domain.PaymentRepository,
 	addressRepo domain.AddressRepository,
+	rdb *redis.Client,
 ) *OrderService {
 	return &OrderService{
 		orderRepo:   orderRepo,
@@ -36,6 +39,7 @@ func NewOrderService(
 		couponRepo:  couponRepo,
 		paymentRepo: paymentRepo,
 		addressRepo: addressRepo,
+		cache:       utils.NewCacheManager(rdb),
 	}
 }
 
@@ -243,10 +247,10 @@ func (s *OrderService) CreateOrder(ctx context.Context, userID *uuid.UUID, sessi
 
 	// Create payment record
 	payment := &domain.Payment{
-		OrderID: order.ID,
-		Method:  domain.PaymentMethod(input.PaymentMethod),
-		Status:  domain.PaymentStatusPending,
-		Amount:  total,
+		OrderID:         order.ID,
+		Method:          domain.PaymentMethod(input.PaymentMethod),
+		Status:          domain.PaymentStatusPending,
+		Amount:          total,
 		GatewayResponse: domain.JSON("{}"),
 	}
 	if input.PaymentMethod == "cod" {
@@ -269,6 +273,13 @@ func (s *OrderService) CreateOrder(ctx context.Context, userID *uuid.UUID, sessi
 }
 
 func (s *OrderService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Order, error) {
+	// Try cache first
+	cacheKey := fmt.Sprintf("order:id:%s", id)
+	var cachedOrder domain.Order
+	if err := s.cache.Get(ctx, cacheKey, &cachedOrder); err == nil {
+		return &cachedOrder, nil
+	}
+
 	order, err := s.orderRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -277,21 +288,41 @@ func (s *OrderService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Order
 	order.Payment = payment
 	addr, _ := s.addressRepo.GetByID(ctx, order.ShippingAddressID)
 	order.ShippingAddress = addr
+
+	// Cache for 30 minutes
+	_ = s.cache.Set(ctx, cacheKey, order, 30*time.Minute)
+
 	return order, nil
 }
 
 func (s *OrderService) GetByOrderNumber(ctx context.Context, orderNumber string) (*domain.Order, error) {
+	// Try cache first
+	cacheKey := fmt.Sprintf("order:number:%s", orderNumber)
+	var cachedOrder domain.Order
+	if err := s.cache.Get(ctx, cacheKey, &cachedOrder); err == nil {
+		return &cachedOrder, nil
+	}
+
 	order, err := s.orderRepo.GetByOrderNumber(ctx, orderNumber)
 	if err != nil {
 		return nil, err
 	}
 	payment, _ := s.paymentRepo.GetByOrderID(ctx, order.ID)
 	order.Payment = payment
+
+	// Cache for 30 minutes
+	_ = s.cache.Set(ctx, cacheKey, order, 30*time.Minute)
+
 	return order, nil
 }
 
 func (s *OrderService) UpdateStatus(ctx context.Context, id uuid.UUID, status domain.OrderStatus) error {
-	return s.orderRepo.UpdateStatus(ctx, id, status)
+	err := s.orderRepo.UpdateStatus(ctx, id, status)
+	if err == nil {
+		// Invalidate cache
+		s.invalidateOrderCache(ctx, id)
+	}
+	return err
 }
 
 func (s *OrderService) GetUserOrders(ctx context.Context, userID uuid.UUID, page, limit int) ([]domain.Order, int64, error) {
@@ -326,4 +357,10 @@ func (s *OrderService) GetDashboardStats(ctx context.Context) (map[string]interf
 		"total_products":     totalProducts,
 		"low_stock_products": lowStockProducts,
 	}, nil
+}
+
+func (s *OrderService) invalidateOrderCache(ctx context.Context, orderID uuid.UUID) {
+	_ = s.cache.Delete(ctx,
+		fmt.Sprintf("order:id:%s", orderID),
+	)
 }
