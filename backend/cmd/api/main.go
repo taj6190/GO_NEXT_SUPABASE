@@ -33,14 +33,15 @@ func main() {
 	ctx := context.Background()
 	dbPool, err := pgxpool.New(ctx, cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Println("❌ DB connection failed:", err)
+		log.Println("⚠️ Continuing without database (DEGRADED MODE)")
+		dbPool = nil
+	} else if err := dbPool.Ping(ctx); err != nil {
+		log.Println("❌ DB ping failed:", err)
+		dbPool = nil
+	} else {
+		log.Println("✅ Database connected")
 	}
-	defer dbPool.Close()
-
-	if err := dbPool.Ping(ctx); err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
-	}
-	log.Println("✅ Connected to PostgreSQL (Supabase)")
 
 	// Run migrations
 	runMigrations(dbPool, ctx)
