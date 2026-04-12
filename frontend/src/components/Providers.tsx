@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useAuthStore, useCartStore } from "@/store";
 import CartDrawer from "@/components/cart/CartDrawer";
+import BuyNowModal from "@/components/checkout/BuyNowModal";
+import { useAuthStore, useCartStore } from "@/store";
+import { useEffect } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const loadUser = useAuthStore((s) => s.loadUser);
@@ -17,6 +18,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <>
       {children}
       <CartDrawer />
+      <BuyNowModal />
     </>
   );
 }

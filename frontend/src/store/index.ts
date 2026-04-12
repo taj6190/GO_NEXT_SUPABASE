@@ -1,8 +1,8 @@
-import { create } from "zustand";
 import api from "@/lib/api";
-import { User, CartItem } from "@/lib/types";
+import { CartItem, User } from "@/lib/types";
 import { getEffectivePrice } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { create } from "zustand";
 
 // Auth Store
 interface AuthState {
@@ -10,7 +10,12 @@ interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, fullName: string, phone: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    fullName: string,
+    phone: string,
+  ) => Promise<void>;
   logout: () => void;
   loadUser: () => Promise<void>;
 }
@@ -73,7 +78,11 @@ interface CartState {
   items: CartItem[];
   isLoading: boolean;
   fetchCart: () => Promise<void>;
-  addItem: (productId: string, quantity: number, variantId?: string) => Promise<void>;
+  addItem: (
+    productId: string,
+    quantity: number,
+    variantId?: string,
+  ) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -91,7 +100,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       const { data } = await api.get("/cart");
       if (data.success && data.data != null) {
         const raw = data.data as CartItem[] | { items?: CartItem[] };
-        const items = Array.isArray(raw) ? raw : raw.items ?? [];
+        const items = Array.isArray(raw) ? raw : (raw.items ?? []);
         set({ items: Array.isArray(items) ? items : [] });
       }
     } catch {
@@ -102,7 +111,10 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   addItem: async (productId, quantity, variantId) => {
-    const payload: Record<string, unknown> = { product_id: productId, quantity };
+    const payload: Record<string, unknown> = {
+      product_id: productId,
+      quantity,
+    };
     if (variantId) payload.variant_id = variantId;
     await api.post("/cart/items", payload);
     await get().fetchCart();
@@ -113,7 +125,8 @@ export const useCartStore = create<CartState>((set, get) => ({
       await api.put(`/cart/items/${itemId}`, { quantity });
       await get().fetchCart();
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      const msg = (err as { response?: { data?: { error?: string } } })
+        ?.response?.data?.error;
       toast.error(msg || "Could not update quantity");
       await get().fetchCart();
     }
@@ -141,7 +154,8 @@ export const useCartStore = create<CartState>((set, get) => ({
   getSubtotal: () => {
     return get().items.reduce((sum, item) => {
       const price = item.variant?.price || item.product?.price || "0";
-      const discountPrice = item.variant?.discount_price || item.product?.discount_price || "0";
+      const discountPrice =
+        item.variant?.discount_price || item.product?.discount_price || "0";
       const ep = getEffectivePrice(price, discountPrice);
       return sum + ep.current * item.quantity;
     }, 0);
@@ -153,24 +167,38 @@ export const useCartStore = create<CartState>((set, get) => ({
 }));
 
 // UI Store
+interface BuyNowProduct {
+  id: string;
+  name: string;
+  price: string;
+  discount_price: string;
+  image_url: string;
+  quantity: number;
+  variantId?: string;
+}
+
 interface UIState {
   cartOpen: boolean;
   mobileMenuOpen: boolean;
   searchQuery: string;
+  buyNowProduct: BuyNowProduct | null;
   toggleCart: () => void;
   setCartOpen: (open: boolean) => void;
   toggleMobileMenu: () => void;
   setMobileMenuOpen: (open: boolean) => void;
   setSearchQuery: (q: string) => void;
+  setBuyNowProduct: (product: BuyNowProduct | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
   cartOpen: false,
   mobileMenuOpen: false,
   searchQuery: "",
+  buyNowProduct: null,
   toggleCart: () => set((s) => ({ cartOpen: !s.cartOpen })),
   setCartOpen: (open) => set({ cartOpen: open }),
   toggleMobileMenu: () => set((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
   setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
   setSearchQuery: (q) => set({ searchQuery: q }),
+  setBuyNowProduct: (product) => set({ buyNowProduct: product }),
 }));

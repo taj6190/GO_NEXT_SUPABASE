@@ -38,6 +38,7 @@ export default function Navbar() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -481,36 +482,104 @@ export default function Navbar() {
                           className="absolute left-0 top-full w-80 bg-white border-2 border-neutral-100 shadow-[0_20px_60px_rgba(0,0,0,0.12)] z-50 max-h-125 overflow-y-auto"
                         >
                           {categories.map((cat, idx) => (
-                            <Link
-                              key={cat.id}
-                              href={`/products?category_id=${cat.id}`}
-                              onClick={() => setShowCategories(false)}
-                              className="flex items-center gap-4 px-5 py-3.5 hover:bg-neutral-50 transition-all group border-b border-neutral-100 last:border-0"
-                            >
-                              <motion.div
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.03 }}
-                              >
-                                {cat.image_url ? (
-                                  <Image
-                                    src={cat.image_url}
-                                    alt=""
-                                    width={32}
-                                    height={32}
-                                    className="w-8 h-8 object-contain grayscale group-hover:grayscale-0 transition-all"
-                                  />
-                                ) : (
-                                  <div className="w-8 h-8 bg-neutral-100 flex items-center justify-center text-sm">
-                                    📦
-                                  </div>
+                            <div key={cat.id}>
+                              {/* Main Category */}
+                              <div className="flex items-center gap-0 border-b border-neutral-100 last:border-0">
+                                <Link
+                                  href={`/products?category_id=${cat.id}`}
+                                  onClick={() => setShowCategories(false)}
+                                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-neutral-50 transition-all group flex-1"
+                                >
+                                  <motion.div
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.03 }}
+                                  >
+                                    {cat.image_url ? (
+                                      <Image
+                                        src={cat.image_url}
+                                        alt=""
+                                        width={32}
+                                        height={32}
+                                        className="w-8 h-8 object-contain grayscale group-hover:grayscale-0 transition-all"
+                                      />
+                                    ) : (
+                                      <div className="w-8 h-8 bg-neutral-100 flex items-center justify-center text-sm">
+                                        📦
+                                      </div>
+                                    )}
+                                  </motion.div>
+                                  <span className="font-bold text-sm text-neutral-700 group-hover:text-black flex-1">
+                                    {cat.name}
+                                  </span>
+                                  <ArrowRight className="w-4 h-4 text-neutral-300 group-hover:text-[#ef4a23] group-hover:translate-x-1 transition-all" />
+                                </Link>
+
+                                {/* Expand/Collapse button for subcategories */}
+                                {cat.children && cat.children.length > 0 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      setExpandedCategory(
+                                        expandedCategory === cat.id
+                                          ? null
+                                          : cat.id,
+                                      );
+                                    }}
+                                    className="px-3 py-3.5 hover:bg-neutral-50 transition-all border-l border-neutral-100"
+                                  >
+                                    <ChevronDown
+                                      className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${
+                                        expandedCategory === cat.id
+                                          ? "rotate-180"
+                                          : ""
+                                      }`}
+                                      strokeWidth={2.5}
+                                    />
+                                  </button>
                                 )}
-                              </motion.div>
-                              <span className="font-bold text-sm text-neutral-700 group-hover:text-black flex-1">
-                                {cat.name}
-                              </span>
-                              <ArrowRight className="w-4 h-4 text-neutral-300 group-hover:text-[#ef4a23] group-hover:translate-x-1 transition-all" />
-                            </Link>
+                              </div>
+
+                              {/* Subcategories Dropdown */}
+                              <AnimatePresence>
+                                {expandedCategory === cat.id &&
+                                  cat.children &&
+                                  cat.children.length > 0 && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="bg-neutral-50 overflow-hidden"
+                                    >
+                                      {cat.children.map((subcat) => (
+                                        <Link
+                                          key={subcat.id}
+                                          href={`/products?category_id=${subcat.id}`}
+                                          onClick={() =>
+                                            setShowCategories(false)
+                                          }
+                                          className="flex items-center gap-3 px-9 py-2.5 text-sm font-semibold text-neutral-600 hover:text-[#ef4a23] hover:bg-white transition-all group border-b border-neutral-100 last:border-0"
+                                        >
+                                          <motion.div
+                                            initial={{
+                                              opacity: 0,
+                                              x: -5,
+                                            }}
+                                            animate={{
+                                              opacity: 1,
+                                              x: 0,
+                                            }}
+                                            transition={{ duration: 0.15 }}
+                                            className="w-1 h-1 bg-[#ef4a23] rounded-full group-hover:scale-150 transition-transform"
+                                          />
+                                          {subcat.name}
+                                        </Link>
+                                      ))}
+                                    </motion.div>
+                                  )}
+                              </AnimatePresence>
+                            </div>
                           ))}
                         </motion.div>
                       )}

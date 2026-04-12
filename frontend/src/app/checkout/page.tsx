@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { CreditCard, ShoppingBag, Truck, Check, ShieldCheck } from "lucide-react";
-import { useCartStore, useAuthStore } from "@/store";
-import { formatPrice, getCartItemImage, getEffectivePrice } from "@/lib/utils";
 import api from "@/lib/api";
+import { formatPrice, getCartItemImage, getEffectivePrice } from "@/lib/utils";
+import { useAuthStore, useCartStore } from "@/store";
+import {
+  Check,
+  CreditCard,
+  ShieldCheck,
+  ShoppingBag,
+  Truck,
+} from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 interface CheckoutForm {
@@ -14,16 +20,18 @@ interface CheckoutForm {
   email: string;
   phone: string;
   address_line1: string;
-  city: string;
-  district: string;
-  postal_code: string;
   paymentMethod: "cod" | "bkash" | "nagad";
-  notes: string;
 }
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getSubtotal, isLoading: cartLoading, clearCart, fetchCart } = useCartStore();
+  const {
+    items,
+    getSubtotal,
+    isLoading: cartLoading,
+    clearCart,
+    fetchCart,
+  } = useCartStore();
   const { isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<CheckoutForm>({
@@ -31,11 +39,7 @@ export default function CheckoutPage() {
     email: "",
     phone: "",
     address_line1: "",
-    city: "Dhaka",
-    district: "Dhaka",
-    postal_code: "",
     paymentMethod: "cod",
-    notes: "",
   });
 
   // Ensure cart is loaded
@@ -53,46 +57,65 @@ export default function CheckoutPage() {
     }
   }, [items.length, cartLoading, router]);
 
-  const getItemPrice = (item: typeof items[0]) => {
+  const getItemPrice = (item: (typeof items)[0]) => {
     const price = item.variant?.price || item.product?.price || "0";
-    const discountPrice = item.variant?.discount_price || item.product?.discount_price || "0";
+    const discountPrice =
+      item.variant?.discount_price || item.product?.discount_price || "0";
     return getEffectivePrice(price, discountPrice);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation - only name and phone are mandatory
+    if (!form.full_name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    if (!form.phone.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Step 1: Create shipping address
-      const { data: addrData } = await api.post("/addresses", {
-        full_name: form.full_name,
-        phone: form.phone,
-        address_line1: form.address_line1,
-        city: form.city,
-        district: form.district,
-        postal_code: form.postal_code,
-        is_default: true,
-      });
+      // Step 1: Create/update shipping address (only if address provided)
+      let addressId: string | undefined;
 
-      if (!addrData.success) {
-        toast.error(addrData.error || "Failed to save address");
-        setLoading(false);
-        return;
+      if (form.address_line1.trim()) {
+        const { data: addrData } = await api.post("/addresses", {
+          full_name: form.full_name,
+          phone: form.phone,
+          address_line1: form.address_line1,
+          city: "Dhaka", // Default city
+          district: "Dhaka", // Default district
+          postal_code: "",
+          is_default: true,
+        });
+
+        if (!addrData.success) {
+          toast.error(addrData.error || "Failed to save address");
+          setLoading(false);
+          return;
+        }
+
+        addressId = addrData.data?.id;
       }
 
-      const addressId = addrData.data?.id;
-
-      // Step 2: Create order (backend uses cart items automatically)
+      // Step 2: Create order
       const orderPayload: Record<string, unknown> = {
-        shipping_address_id: addressId,
         payment_method: form.paymentMethod,
-        notes: form.notes,
       };
+
+      // Add address only if it exists
+      if (addressId) {
+        orderPayload.shipping_address_id = addressId;
+      }
 
       // Add guest info if not authenticated
       if (!isAuthenticated) {
-        orderPayload.guest_email = form.email;
+        orderPayload.guest_email = form.email || "";
         orderPayload.guest_phone = form.phone;
       }
 
@@ -101,8 +124,25 @@ export default function CheckoutPage() {
       if (data.success) {
         await clearCart();
         toast.success("Order placed successfully!");
+
+        // For COD, show success message
+        if (form.paymentMethod === "cod") {
+          toast.success("We'll contact you soon to confirm delivery details");
+        }
+
         const orderNumber = data.data?.order_number;
-        router.push(orderNumber ? `/track?order=${orderNumber}` : "/");
+
+        // Redirect based on user type
+        if (isAuthenticated) {
+          // Authenticated users go to orders page
+          router.push("/orders");
+        } else {
+          // Guest users go to confirmation page with email
+          const confirmUrl = `/order-confirmation?order=${orderNumber}${
+            form.email ? `&email=${encodeURIComponent(form.email)}` : ""
+          }`;
+          router.push(confirmUrl);
+        }
       } else {
         toast.error(data.error || "Checkout failed");
       }
@@ -131,93 +171,174 @@ export default function CheckoutPage() {
         </div>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Secure Checkout</h1>
-          <p className="text-sm text-[var(--text-muted)]">Complete your purchase safely</p>
+          <p className="text-sm text-[var(--text-muted)]">
+            Complete your purchase safely
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-        {/* Form Column */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-8">
-          <form id="checkout-form" onSubmit={handleSubmit} className="space-y-8">
-            {/* Contact Info */}
+        {/* Form Column - Simplified */}
+        <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+          <form
+            id="checkout-form"
+            onSubmit={handleSubmit}
+            className="space-y-6"
+          >
+            {/* Main Contact Info - Minimal */}
             <section className="glass-card-static p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs flex items-center justify-center">1</span>
-                Contact Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-sm font-medium text-[var(--text-secondary)]">Full Name *</label>
-                  <input required type="text" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="John Doe" className="input-field" />
+              <h2 className="text-lg font-bold mb-6">Your Information</h2>
+
+              {/* Name - Mandatory */}
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-medium text-[var(--text-secondary)]">
+                  Full Name <span className="text-[var(--red-500)]">*</span>
+                </label>
+                <input
+                  required
+                  type="text"
+                  value={form.full_name}
+                  onChange={(e) =>
+                    setForm({ ...form, full_name: e.target.value })
+                  }
+                  placeholder="e.g., Ahmed Hassan"
+                  className="input-field w-full"
+                />
+              </div>
+
+              {/* Phone - Mandatory */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[var(--text-secondary)]">
+                  Phone Number <span className="text-[var(--red-500)]">*</span>
+                </label>
+                <div className="flex items-center">
+                  <span className="text-sm text-[var(--text-muted)] px-3 py-2 bg-[var(--bg-secondary)] rounded-l-lg border border-[var(--border)]">
+                    +880
+                  </span>
+                  <input
+                    required
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) =>
+                      setForm({ ...form, phone: e.target.value })
+                    }
+                    placeholder="e.g., 1712345678"
+                    className="input-field w-full rounded-l-none"
+                  />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-[var(--text-secondary)]">Email Address *</label>
-                  <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="john@example.com" className="input-field" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-[var(--text-secondary)]">Phone Number *</label>
-                  <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+880 1..." className="input-field" />
-                </div>
+                <p className="text-xs text-[var(--text-muted)]">
+                  We'll use this to contact you about your order
+                </p>
               </div>
             </section>
 
-            {/* Shipping Info */}
+            {/* Optional Details */}
             <section className="glass-card-static p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs flex items-center justify-center">2</span>
-                Shipping Address
+              <h2 className="text-lg font-bold mb-6">
+                Delivery Details{" "}
+                <span className="text-xs font-normal text-[var(--text-muted)]">
+                  (Optional)
+                </span>
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-sm font-medium text-[var(--text-secondary)]">Street Address *</label>
-                  <input required type="text" value={form.address_line1} onChange={(e) => setForm({ ...form, address_line1: e.target.value })} placeholder="House/Apt, Road, Area" className="input-field" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-[var(--text-secondary)]">City/District *</label>
-                  <select value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value, district: e.target.value })} className="input-field">
-                    <option value="Dhaka">Dhaka</option>
-                    <option value="Chittagong">Chittagong</option>
-                    <option value="Sylhet">Sylhet</option>
-                    <option value="Rajshahi">Rajshahi</option>
-                    <option value="Khulna">Khulna</option>
-                    <option value="Other">Other District</option>
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-[var(--text-secondary)]">Postal Code</label>
-                  <input type="text" value={form.postal_code} onChange={(e) => setForm({ ...form, postal_code: e.target.value })} placeholder="1210" className="input-field" />
-                </div>
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-sm font-medium text-[var(--text-secondary)]">Order Notes (Optional)</label>
-                  <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Any special instructions..." className="input-field" rows={2} />
-                </div>
+
+              {/* Email - Optional */}
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-medium text-[var(--text-secondary)]">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="your@email.com"
+                  className="input-field w-full"
+                />
+              </div>
+
+              {/* Address - Optional */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[var(--text-secondary)]">
+                  Delivery Address
+                </label>
+                <textarea
+                  value={form.address_line1}
+                  onChange={(e) =>
+                    setForm({ ...form, address_line1: e.target.value })
+                  }
+                  placeholder="House/Apt, Road, Area, etc."
+                  className="input-field w-full"
+                  rows={2}
+                />
+                <p className="text-xs text-[var(--text-muted)]">
+                  If not provided, we'll call to confirm your delivery location
+                </p>
               </div>
             </section>
 
             {/* Payment Method */}
             <section className="glass-card-static p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs flex items-center justify-center">3</span>
-                Payment Method
-              </h2>
-              <div className="grid grid-cols-1 gap-4">
+              <h2 className="text-lg font-bold mb-6">Payment Method</h2>
+              <div className="grid grid-cols-1 gap-3">
                 {[
-                  { id: "cod", label: "Cash on Delivery", desc: "Pay when you receive your order", icon: Truck },
-                  { id: "bkash", label: "bKash Payment", desc: "Secure mobile banking", icon: CreditCard },
-                  { id: "nagad", label: "Nagad Payment", desc: "Secure mobile banking", icon: CreditCard },
+                  {
+                    id: "cod" as const,
+                    label: "Cash on Delivery",
+                    desc: "Pay when you receive • No advance payment needed",
+                    icon: Truck,
+                  },
+                  {
+                    id: "bkash" as const,
+                    label: "bKash Payment",
+                    desc: "Secure mobile banking • Pay now",
+                    icon: CreditCard,
+                  },
+                  {
+                    id: "nagad" as const,
+                    label: "Nagad Payment",
+                    desc: "Secure mobile banking • Pay now",
+                    icon: CreditCard,
+                  },
                 ].map((method) => (
-                  <label key={method.id} className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.paymentMethod === method.id ? "border-[var(--brand)] bg-[var(--brand-bg)]" : "border-[var(--border)] hover:border-[var(--brand-light)]"}`}>
+                  <label
+                    key={method.id}
+                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      form.paymentMethod === method.id
+                        ? "border-[var(--brand)] bg-[var(--brand-bg)]"
+                        : "border-[var(--border)] hover:border-[var(--brand-light)]"
+                    }`}
+                  >
                     <div className="flex items-center h-6">
-                      <input type="radio" name="paymentMethod" value={method.id} checked={form.paymentMethod === method.id} onChange={(e) => setForm({ ...form, paymentMethod: e.target.value as "cod" | "bkash" | "nagad" })} className="w-4 h-4 text-[var(--brand)] border-gray-300 focus:ring-[var(--brand)]" />
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={method.id}
+                        checked={form.paymentMethod === method.id}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            paymentMethod: e.target.value as
+                              | "cod"
+                              | "bkash"
+                              | "nagad",
+                          })
+                        }
+                        className="w-5 h-5"
+                      />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <method.icon className="w-4 h-4 text-[var(--accent)]" />
-                        <span className="font-semibold">{method.label}</span>
+                        <span className="font-semibold text-sm">
+                          {method.label}
+                        </span>
                       </div>
-                      <p className="text-xs text-[var(--text-muted)]">{method.desc}</p>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {method.desc}
+                      </p>
                     </div>
-                    {form.paymentMethod === method.id && <Check className="w-5 h-5 text-[var(--brand)]" />}
+                    {form.paymentMethod === method.id && (
+                      <Check className="w-5 h-5 text-[var(--brand)]" />
+                    )}
                   </label>
                 ))}
               </div>
@@ -228,7 +349,7 @@ export default function CheckoutPage() {
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-5 xl:col-span-4">
           <div className="glass-card-static p-6 sticky top-20">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+            <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-[var(--accent)]" />
               Order Summary
             </h2>
@@ -239,20 +360,41 @@ export default function CheckoutPage() {
                 const ep = getItemPrice(item);
                 const img = getCartItemImage(item);
                 return (
-                  <div key={item.id} className="flex gap-2.5 p-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border)]">
+                  <div
+                    key={item.id}
+                    className="flex gap-2.5 p-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border)]"
+                  >
                     <div className="relative w-12 h-12 shrink-0 overflow-hidden rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]">
-                      <Image src={img} alt={item.product?.name ?? "Product"} fill className="object-cover" sizes="48px" />
+                      <Image
+                        src={img}
+                        alt={item.product?.name ?? "Product"}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
-                      <p className="font-medium text-xs leading-snug line-clamp-2" title={item.product?.name}>
+                      <p
+                        className="font-medium text-xs leading-snug line-clamp-2"
+                        title={item.product?.name}
+                      >
                         {item.product?.name}
                       </p>
-                      {item.variant?.options && item.variant.options.length > 0 && (
-                        <p className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">{item.variant.options.map((o) => o.value_name).join(" · ")}</p>
-                      )}
+                      {item.variant?.options &&
+                        item.variant.options.length > 0 && (
+                          <p className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">
+                            {item.variant.options
+                              .map((o) => o.value_name)
+                              .join(" · ")}
+                          </p>
+                        )}
                       <div className="flex items-center justify-between mt-1 gap-2">
-                        <span className="text-[10px] text-[var(--text-secondary)]">×{item.quantity}</span>
-                        <span className="text-xs font-semibold text-[var(--accent)] tabular-nums">{formatPrice(ep.current * item.quantity)}</span>
+                        <span className="text-[10px] text-[var(--text-secondary)]">
+                          ×{item.quantity}
+                        </span>
+                        <span className="text-xs font-semibold text-[var(--accent)] tabular-nums">
+                          {formatPrice(ep.current * item.quantity)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -263,30 +405,49 @@ export default function CheckoutPage() {
             {/* Totals */}
             <div className="space-y-3 pt-6 border-t border-[var(--border)] mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-[var(--text-muted)]">Subtotal ({items.length} items)</span>
-                <span className="font-medium text-[var(--text-primary)]">{formatPrice(subtotal)}</span>
+                <span className="text-[var(--text-muted)]">
+                  Subtotal ({items.length} items)
+                </span>
+                <span className="font-medium text-[var(--text-primary)]">
+                  {formatPrice(subtotal)}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-muted)]">Shipping</span>
-                <span className="font-medium text-[var(--text-primary)]">{formatPrice(shippingCost)}</span>
+                <span className="font-medium text-[var(--text-primary)]">
+                  {formatPrice(shippingCost)}
+                </span>
               </div>
               <div className="pt-3 border-t border-[var(--border)] flex justify-between">
                 <span className="font-bold">Total</span>
-                <span className="font-bold text-xl text-[var(--accent)]">{formatPrice(total)}</span>
+                <span className="font-bold text-xl text-[var(--accent)]">
+                  {formatPrice(total)}
+                </span>
               </div>
-              <p className="text-[10px] text-[var(--text-muted)] text-right">Includes all taxes and duties</p>
+              <p className="text-[10px] text-[var(--text-muted)] text-right">
+                Includes all taxes and duties
+              </p>
             </div>
 
-            <button type="submit" form="checkout-form" disabled={loading} className="w-full btn-primary h-14 text-base relative group justify-center overflow-hidden">
+            <button
+              type="submit"
+              form="checkout-form"
+              disabled={loading}
+              className="w-full btn-primary h-14 text-base relative group justify-center overflow-hidden"
+            >
               <span className="relative z-10 font-bold tracking-wide">
-                {loading ? "Processing..." : `Pay ${formatPrice(total)}`}
+                {loading
+                  ? "Processing..."
+                  : form.paymentMethod === "cod"
+                    ? `Place Order • ${formatPrice(total)}`
+                    : `Pay ${formatPrice(total)}`}
               </span>
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             </button>
 
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
               <ShieldCheck className="w-4 h-4 text-[var(--success)]" />
-              <span>Payments are secure and encrypted</span>
+              <span>Your information is secure</span>
             </div>
           </div>
         </div>

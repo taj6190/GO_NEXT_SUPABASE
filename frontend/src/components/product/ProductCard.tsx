@@ -10,9 +10,9 @@ import {
   getProductImage,
   hasVariants,
 } from "@/lib/utils";
-import { useAuthStore, useCartStore } from "@/store";
+import { useAuthStore, useCartStore, useUIStore } from "@/store";
 import { motion } from "framer-motion";
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingBag, Star, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -30,6 +30,7 @@ const stripHtml = (html: string) => {
 export default function ProductCard({ product, index = 0 }: Props) {
   const addItem = useCartStore((s) => s.addItem);
   const { isAuthenticated } = useAuthStore();
+  const { setBuyNowProduct } = useUIStore();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,6 +41,20 @@ export default function ProductCard({ product, index = 0 }: Props) {
     } catch {
       toast.error("Failed to add");
     }
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const ep = getEffectivePrice(product.price, product.discount_price);
+    setBuyNowProduct({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      discount_price: product.discount_price,
+      image_url: getProductImage(product),
+      quantity: 1,
+    });
   };
 
   const ep = getEffectivePrice(product.price, product.discount_price);
@@ -135,16 +150,34 @@ export default function ProductCard({ product, index = 0 }: Props) {
                 </span>
               </div>
 
-              <button
-                onClick={handleAddToCart}
-                disabled={!isInStock}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-md font-bold text-[10px] transition-colors focus:ring-1 focus:ring-offset-1 focus:ring-gray-900
-                  ${!isInStock ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#1f1f1f] text-white hover:bg-black"}
-                `}
-              >
-                Buy
-                <ShoppingBag size={11} strokeWidth={2.5} className="mb-[1px]" />
-              </button>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={handleBuyNow}
+                  disabled={!isInStock}
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded-md font-bold text-[10px] transition-colors focus:ring-1 focus:ring-offset-1 focus:ring-[#ef4a23] whitespace-nowrap
+                    ${!isInStock ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#ef4a23] text-white hover:bg-[#d63516]"}
+                  `}
+                  title="Buy Now - Direct checkout"
+                >
+                  Buy Now
+                  <Zap size={11} strokeWidth={2.5} className="mb-[1px]" />
+                </button>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!isInStock}
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded-md font-bold text-[10px] transition-colors focus:ring-1 focus:ring-offset-1 focus:ring-gray-900
+                    ${!isInStock ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#1f1f1f] text-white hover:bg-black"}
+                  `}
+                  title="Add to Cart"
+                >
+                  Cart
+                  <ShoppingBag
+                    size={11}
+                    strokeWidth={2.5}
+                    className="mb-[1px]"
+                  />
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between border-t border-gray-100 pt-1.5">
