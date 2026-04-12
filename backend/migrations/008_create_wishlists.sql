@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS wishlist_items (
     CONSTRAINT unique_wishlist_product UNIQUE (wishlist_id, product_id)
 );
 
-CREATE INDEX idx_wishlists_user ON wishlists(user_id);
-CREATE INDEX idx_wishlist_items_wishlist ON wishlist_items(wishlist_id);
+CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_items_wishlist ON wishlist_items(wishlist_id);

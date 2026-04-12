@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS addresses (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_addresses_user ON addresses(user_id);
-CREATE INDEX idx_addresses_session ON addresses(guest_session_id);
+CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);
+CREATE INDEX IF NOT EXISTS idx_addresses_session ON addresses(guest_session_id);

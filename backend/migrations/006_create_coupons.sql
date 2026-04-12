@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS coupons (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_coupons_code ON coupons(code);
-CREATE INDEX idx_coupons_active ON coupons(is_active);
+CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
+CREATE INDEX IF NOT EXISTS idx_coupons_active ON coupons(is_active);

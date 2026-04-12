@@ -11,6 +11,6 @@ CREATE TABLE IF NOT EXISTS cart_items (
     CONSTRAINT check_user_or_session CHECK (user_id IS NOT NULL OR session_id IS NOT NULL)
 );
 
-CREATE INDEX idx_cart_user ON cart_items(user_id);
-CREATE INDEX idx_cart_session ON cart_items(session_id);
-CREATE INDEX idx_cart_product ON cart_items(product_id);
+CREATE INDEX IF NOT EXISTS idx_cart_user ON cart_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_cart_session ON cart_items(session_id);
+CREATE INDEX IF NOT EXISTS idx_cart_product ON cart_items(product_id);

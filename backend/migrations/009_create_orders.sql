@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     total_price DECIMAL(12, 2) NOT NULL
 );
 
-CREATE INDEX idx_orders_user ON orders(user_id);
-CREATE INDEX idx_orders_number ON orders(order_number);
-CREATE INDEX idx_orders_status ON orders(status);
-CREATE INDEX idx_orders_created ON orders(created_at DESC);
-CREATE INDEX idx_order_items_order ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_number ON orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);

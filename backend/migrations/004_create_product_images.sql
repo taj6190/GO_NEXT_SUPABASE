@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS product_images (
     sort_order INT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX idx_product_images_product ON product_images(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_images_product ON product_images(product_id);
