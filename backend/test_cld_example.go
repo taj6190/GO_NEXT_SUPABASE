@@ -9,7 +9,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
-func main() {
+func mains() {
 	cld, _ := cloudinary.NewFromParams("dvjyqpdhx", "392311941428618", "E9L_bS41I_AxZQqnEwdqDvVCulI")
 	res, err := cld.Upload.Upload(context.Background(), "dummy.jpg", uploader.UploadParams{Folder: "test"})
 	if err != nil {
