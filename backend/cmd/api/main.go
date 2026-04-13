@@ -7,11 +7,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -25,56 +23,47 @@ import (
 )
 
 func main() {
-	// 1. Load config
+	// Load config
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("❌ Failed to load config: %v", err)
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Set Gin mode based on config (ensure this is "release" in production)
-	gin.SetMode(cfg.GinMode)
-
-	// 2. Database connection with timeout context
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
+	// Database connection
+	ctx := context.Background()
 	dbPool, err := pgxpool.New(ctx, cfg.DatabaseURL)
 	if err != nil {
-		log.Println("❌ DB connection pool creation failed:", err)
+		log.Println("❌ DB connection failed:", err)
 		log.Println("⚠️ Continuing without database (DEGRADED MODE)")
 		dbPool = nil
 	} else if err := dbPool.Ping(ctx); err != nil {
 		log.Println("❌ DB ping failed:", err)
 		dbPool = nil
 	} else {
-		log.Println("✅ Database connected successfully")
-		// Run migrations only if DB is connected
-		runMigrations(dbPool, context.Background())
-		seedAdmin(dbPool, context.Background(), cfg)
+		log.Println("✅ Database connected")
 	}
 
-	// 3. Redis connection (optional, graceful degradation)
-	var rdb *redis.Client
-	if cfg.RedisURL != "" {
-		opt, err := redis.ParseURL(cfg.RedisURL)
-		if err == nil {
-			rdb = redis.NewClient(opt)
-			redisCtx, redisCancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer redisCancel()
+	// Run migrations
+	runMigrations(dbPool, ctx)
 
-			if err := rdb.Ping(redisCtx).Err(); err != nil {
-				log.Printf("⚠️ Redis not available: %v (caching disabled)", err)
-				rdb = nil
-			} else {
-				log.Println("✅ Connected to Redis")
-				defer rdb.Close()
-			}
+	// Redis connection (optional)
+	var rdb *redis.Client
+	opt, err := redis.ParseURL(cfg.RedisURL)
+	if err == nil {
+		rdb = redis.NewClient(opt)
+		if err := rdb.Ping(ctx).Err(); err != nil {
+			log.Printf("⚠️  Redis not available: %v (caching disabled)", err)
+			rdb = nil
 		} else {
-			log.Printf("⚠️ Invalid Redis URL: %v", err)
+			log.Println("✅ Connected to Redis")
+			defer rdb.Close()
 		}
 	}
 
-	// 4. Initialize Repositories
+	// Seed admin user
+	seedAdmin(dbPool, ctx, cfg)
+
+	// Repositories
 	userRepo := repository.NewUserRepository(dbPool)
 	productRepo := repository.NewProductRepository(dbPool)
 	categoryRepo := repository.NewCategoryRepository(dbPool)
@@ -86,7 +75,7 @@ func main() {
 	addressRepo := repository.NewAddressRepository(dbPool)
 	reviewRepo := repository.NewReviewRepository(dbPool)
 
-	// 5. Initialize Services
+	// Services
 	authService := service.NewAuthService(userRepo, cfg)
 	userService := service.NewUserService(userRepo)
 	productService := service.NewProductService(productRepo, rdb)
@@ -100,7 +89,7 @@ func main() {
 	uploadService := service.NewUploadService(cfg)
 	reviewService := service.NewReviewService(reviewRepo, productRepo, rdb)
 
-	// 6. Initialize Handlers
+	// Handlers
 	authHandler := handler.NewAuthHandler(authService, cartService)
 	userHandler := handler.NewUserHandler(userService)
 	productHandler := handler.NewProductHandler(productService)
@@ -114,67 +103,26 @@ func main() {
 	uploadHandler := handler.NewUploadHandler(uploadService)
 	reviewHandler := handler.NewReviewHandler(reviewService)
 
-	// 7. Router Setup
+	// Router
+	gin.SetMode(cfg.GinMode)
 	r := gin.Default()
-
-	// 🚨 PRODUCTION FIX: Trust Proxies
-	// Render, Heroku, AWS etc. use reverse proxies. This ensures c.ClientIP() gets the real user IP, not the Render load balancer IP.
-	_ = r.SetTrustedProxies(nil)
-
-	// 🚨 PRODUCTION FIX: Dynamic CORS Allowed Origins
-	// Read from ENV variable to support Vercel preview branches or custom domains without code changes.
-	allowedOriginsStr := os.Getenv("CORS_ALLOWED_ORIGINS")
-	var allowedOrigins []string
-	if allowedOriginsStr != "" {
-		// e.g., CORS_ALLOWED_ORIGINS="https://go-next-supabase.vercel.app,https://my-custom-domain.com"
-		allowedOrigins = strings.Split(allowedOriginsStr, ",")
-		for i := range allowedOrigins {
-			allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
-		}
-	} else {
-		// Fallback to defaults
-		allowedOrigins = []string{
-			"https://go-next-supabase.vercel.app",
-			"http://localhost:3000",
-		}
-	}
-
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     allowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "X-Session-ID", "Accept"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
 
 	// Global middleware
 	r.Use(middleware.CORSMiddleware(cfg.FrontendURL))
 	r.Use(middleware.RateLimitMiddleware(1000, time.Minute))
 
-	// Health check endpoint with DB and Redis status
+	// Health check endpoint with Redis status
 	r.GET("/health", func(c *gin.Context) {
 		redisStatus := "unavailable"
-		dbStatus := "unavailable"
-
 		if rdb != nil {
 			if err := rdb.Ping(context.Background()).Err(); err == nil {
 				redisStatus = "ok"
 			}
 		}
-
-		if dbPool != nil {
-			if err := dbPool.Ping(context.Background()); err == nil {
-				dbStatus = "ok"
-			}
-		}
-
 		c.JSON(http.StatusOK, gin.H{
-			"status":   "ok",
-			"time":     time.Now().Format(time.RFC3339),
-			"database": dbStatus,
-			"redis":    redisStatus,
-			"env":      cfg.GinMode,
+			"status": "ok",
+			"time":   time.Now().Format(time.RFC3339),
+			"redis":  redisStatus,
 		})
 	})
 
@@ -214,7 +162,7 @@ func main() {
 		reviews.POST("", middleware.AuthMiddleware(cfg.JWTSecret), reviewHandler.Create)
 	}
 
-	// Cart routes
+	// Cart routes (works for both guest and logged-in)
 	cart := api.Group("/cart")
 	cart.Use(middleware.OptionalAuth(cfg.JWTSecret), middleware.GuestSession())
 	{
@@ -255,7 +203,7 @@ func main() {
 		coupons.POST("/validate", middleware.OptionalAuth(cfg.JWTSecret), middleware.GuestSession(), couponHandler.Validate)
 	}
 
-	// Wishlist routes
+	// Wishlist routes (auth required)
 	wishlist := api.Group("/wishlist")
 	wishlist.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 	{
@@ -316,21 +264,17 @@ func main() {
 		// Payments
 		admin.GET("/payments", paymentHandler.ListPayments)
 
-		// Reviews
+		// Reviews (admin can delete)
 		admin.DELETE("/reviews/:id", reviewHandler.Delete)
 
 		// Upload
 		admin.POST("/upload", uploadHandler.UploadImage)
 	}
 
-	// 8. Server Setup
+	// Server
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
 		Handler: r,
-		// 🚨 PRODUCTION FIX: Mitigate slowloris attacks and handle Render timeouts gracefully
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
 	}
 
 	go func() {
@@ -340,24 +284,21 @@ func main() {
 		}
 	}()
 
-	// 9. Graceful shutdown
+	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutting down server...")
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second) // Increased shutdown buffer to 10s
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
-	log.Println("Server exited cleanly")
+	log.Println("Server exited")
 }
 
 func runMigrations(pool *pgxpool.Pool, ctx context.Context) {
-	// Note: In a true containerized/Render production environment, it is highly recommended
-	// to use Go's 'embed' package (`//go:embed migrations/*.sql`) rather than reading from os files,
-	// to ensure the files are baked into your binary and paths don't break.
 	migrations := []string{
 		"migrations/001_create_users.sql",
 		"migrations/002_create_categories.sql",
@@ -382,9 +323,7 @@ func runMigrations(pool *pgxpool.Pool, ctx context.Context) {
 		}
 		_, err = pool.Exec(ctx, string(data))
 		if err != nil {
-			// Do not log.Fatal here if you want the app to keep running on duplicate table errors,
-			// but consider tracking actual failure states carefully.
-			log.Printf("⚠️  Migration %s encountered an issue: %v", m, err)
+			log.Printf("⚠️  Migration %s: %v", m, err)
 		} else {
 			log.Printf("✅ Migration applied: %s", m)
 		}
