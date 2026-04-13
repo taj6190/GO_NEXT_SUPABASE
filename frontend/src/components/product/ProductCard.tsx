@@ -46,7 +46,6 @@ export default function ProductCard({ product, index = 0 }: Props) {
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const ep = getEffectivePrice(product.price, product.discount_price);
     setBuyNowProduct({
       id: product.id,
       name: product.name,
@@ -61,145 +60,137 @@ export default function ProductCard({ product, index = 0 }: Props) {
   const discount = getDiscountPercent(product.price, product.discount_price);
   const isInStock = product.stock_quantity > 0;
 
-  const specs = product.attributes
-    ? Object.entries(product.attributes).slice(0, 3)
-    : [];
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.4 }}
+      transition={{
+        delay: index * 0.06,
+        duration: 0.45,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       className="h-full"
     >
-      <div className="group relative flex flex-col h-full bg-white border border-gray-100 hover:shadow-[0_2px_15px_rgb(0,0,0,0.05)] transition-all duration-300 overflow-hidden">
-        {/* Badges */}
-        {discount > 0 ? (
-          <div className="absolute top-1.5 right-1.5 z-10 bg-[#b91c1c] text-white text-[8.5px] px-1.5 py-0.5 font-bold rounded-sm tracking-wider uppercase shadow-sm">
+      <div className="group relative flex flex-col h-full bg-white border border-[#ede9e2] hover:border-[#c9a96e]/40 hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden">
+        {/* ── Badges ── */}
+        {discount > 0 && (
+          <div className="absolute top-2.5 left-2.5 z-10 bg-[#1a1916] text-[#c9a96e] text-[9px] px-2 py-1 font-semibold tracking-[0.12em] uppercase [font-family:'DM_Sans',sans-serif]">
             -{discount}%
           </div>
-        ) : product.is_featured ? (
-          <div className="absolute top-1.5 right-1.5 z-10 bg-zinc-900 text-white text-[8.5px] px-1.5 py-0.5 font-bold rounded-sm tracking-wider uppercase shadow-sm">
+        )}
+        {!discount && product.is_featured && (
+          <div className="absolute top-2.5 left-2.5 z-10 bg-[#c9a96e] text-[#1a1916] text-[9px] px-2 py-1 font-semibold tracking-[0.12em] uppercase [font-family:'DM_Sans',sans-serif]">
             TOP
           </div>
-        ) : null}
+        )}
 
-        {/* Image Container - Changed to contain */}
+        {/* ── Image ── */}
         <Link
           href={`/products/${product.slug}`}
-          className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden block shrink-0"
+          className="relative w-full aspect-[4/3] bg-[#faf8f5] overflow-hidden block shrink-0"
         >
           <Image
             src={getProductImage(product)}
             alt={product.name}
             fill
-            className="object-contain group-hover:scale-105 transition-transform duration-700"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-contain p-3 group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
+
+          {/* Hover action overlay */}
+          <div className="absolute inset-0 bg-[#1a1916]/0 group-hover:bg-[#1a1916]/[0.03] transition-colors duration-500" />
+
           {!isInStock && (
-            <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center z-10">
-              <span className="bg-zinc-900 text-white text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest shadow-sm">
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+              <span className="bg-[#1a1916] text-[#faf8f5] text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.14em] [font-family:'DM_Sans',sans-serif]">
                 Sold Out
               </span>
             </div>
           )}
+
+          {/* Quick action buttons — slide up on hover */}
+          {isInStock && (
+            <div className="absolute bottom-0 inset-x-0 flex gap-px translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-10">
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] text-[10px] font-semibold tracking-[0.08em] uppercase py-2.5 transition-colors duration-150 [font-family:'DM_Sans',sans-serif]"
+              >
+                <Zap size={10} strokeWidth={2.5} />
+                Buy Now
+              </button>
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-[#1a1916] hover:bg-[#2d2b28] text-[#faf8f5] text-[10px] font-semibold tracking-[0.08em] uppercase py-2.5 transition-colors duration-150 [font-family:'DM_Sans',sans-serif]"
+              >
+                <ShoppingBag size={10} strokeWidth={2.5} />
+                Add Cart
+              </button>
+            </div>
+          )}
         </Link>
 
-        {/* Content */}
-        <div className="p-2.5 flex flex-col flex-1">
-          <p className="text-[8.5px] font-bold tracking-[0.05em] text-gray-400 uppercase mb-0.5">
-            {product.category_name || "PRODUCT"}
+        {/* ── Content ── */}
+        <div className="p-3 flex flex-col flex-1 border-t border-[#ede9e2]">
+          {/* Category */}
+          <p className="text-[9.5px] font-semibold tracking-[0.14em] text-[#c9a96e] uppercase mb-1 [font-family:'DM_Sans',sans-serif]">
+            {product.category_name || "Product"}
           </p>
 
+          {/* Name */}
           <Link href={`/products/${product.slug}`}>
-            <h3 className="text-gray-900 text-[13px] font-bold leading-snug mb-1 hover:text-[#b91c1c] transition-colors line-clamp-2">
+            <h3 className="text-[#1a1916] text-[13px] font-medium leading-snug mb-1.5 hover:text-[#c9a96e] transition-colors duration-200 line-clamp-2 [font-family:'DM_Sans',sans-serif]">
               {product.name}
             </h3>
           </Link>
 
-          <p className="text-[10px] text-gray-400 line-clamp-1 leading-tight mb-2">
+          {/* Description */}
+          <p className="text-[10.5px] text-[#9a9086] leading-relaxed line-clamp-1 mb-2.5 [font-family:'DM_Sans',sans-serif]">
             {product.description
               ? stripHtml(product.description)
-              : "Premium configuration engineered for peak performance."}
+              : "Premium quality, built to last."}
           </p>
 
-          {/* Spec tags */}
-          <div className="flex flex-wrap gap-1 mb-2">
-            {specs.slice(0, 2).map(([key, value], idx) => (
-              <span
-                key={idx}
-                className="bg-gray-100/80 text-gray-500 text-[8.5px] font-semibold px-1.5 py-0.5 rounded-sm whitespace-nowrap"
-              >
-                {String(value).substring(0, 12)}
-              </span>
-            ))}
-          </div>
-
+          {/* Spacer */}
           <div className="mt-auto">
+            {/* Price row */}
             <div className="flex items-end justify-between mb-2">
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-0.5">
                 {ep.original && !hasVariants(product) && (
-                  <span className="text-[10px] text-[#9ca3af] line-through font-medium mb-0">
+                  <span className="text-[10px] text-[#b0a898] line-through [font-family:'DM_Sans',sans-serif]">
                     {formatPrice(ep.original)}
                   </span>
                 )}
-                <span className="text-[15px] font-extrabold text-gray-900 leading-none">
+                <span className="text-[16px] font-semibold text-[#1a1916] leading-none [font-family:'DM_Sans',sans-serif]">
                   {hasVariants(product)
                     ? getDisplayPrice(product)
                     : formatPrice(ep.current)}
                 </span>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={handleBuyNow}
-                  disabled={!isInStock}
-                  className={`flex items-center gap-1 px-2 py-1.5 rounded-md font-bold text-[10px] transition-colors focus:ring-1 focus:ring-offset-1 focus:ring-[#ef4a23] whitespace-nowrap
-                    ${!isInStock ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#ef4a23] text-white hover:bg-[#d63516]"}
-                  `}
-                  title="Buy Now - Direct checkout"
-                >
-                  Buy Now
-                  <Zap size={11} strokeWidth={2.5} className="mb-[1px]" />
-                </button>
-                <button
-                  onClick={handleAddToCart}
-                  disabled={!isInStock}
-                  className={`flex items-center gap-1 px-2 py-1.5 rounded-md font-bold text-[10px] transition-colors focus:ring-1 focus:ring-offset-1 focus:ring-gray-900
-                    ${!isInStock ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#1f1f1f] text-white hover:bg-black"}
-                  `}
-                  title="Add to Cart"
-                >
-                  Cart
-                  <ShoppingBag
-                    size={11}
-                    strokeWidth={2.5}
-                    className="mb-[1px]"
-                  />
-                </button>
+              {/* Rating */}
+              <div className="flex items-center gap-1">
+                <Star size={9} className="fill-[#c9a96e] text-[#c9a96e]" />
+                <span className="text-[10px] text-[#9a9086] font-medium [font-family:'DM_Sans',sans-serif]">
+                  {product.average_rating
+                    ? Number(product.average_rating).toFixed(1)
+                    : "—"}{" "}
+                  <span className="text-[#c4bcb2]">
+                    ({product.review_count || 0})
+                  </span>
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-gray-100 pt-1.5">
-              <div className="flex items-center gap-1">
-                <Star size={9} className="fill-[#facc15] text-[#facc15]" />
-                <span className="text-[9px] text-gray-500 font-medium">
-                  {product.average_rating
-                    ? Number(product.average_rating).toFixed(1)
-                    : "0"}{" "}
-                  ({product.review_count || 0})
-                </span>
-              </div>
-
-              {isInStock ? (
-                <span className="text-[#10b981] text-[9px] font-bold uppercase tracking-wide">
-                  In Stock
-                </span>
-              ) : (
-                <span className="text-red-500 text-[9px] font-bold uppercase tracking-wide">
-                  Out of Stock
-                </span>
-              )}
+            {/* Stock indicator */}
+            <div className="flex items-center gap-1.5 pt-2 border-t border-[#f0ebe3]">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${isInStock ? "bg-[#4ade80]" : "bg-[#f87171]"}`}
+              />
+              <span
+                className={`text-[9.5px] font-semibold uppercase tracking-[0.1em] [font-family:'DM_Sans',sans-serif] ${isInStock ? "text-[#4ade80]" : "text-[#f87171]"}`}
+              >
+                {isInStock ? "In Stock" : "Out of Stock"}
+              </span>
             </div>
           </div>
         </div>

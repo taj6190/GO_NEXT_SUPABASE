@@ -20,14 +20,14 @@ function FilterSection({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="bg-white mb-[1px] shadow-sm">
+    <div className="border-b border-[#ede9e2] last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3.5 font-bold text-[14px] text-gray-800 hover:text-[#ef4a23] transition-colors"
+        className="w-full flex items-center justify-between px-0 py-4 text-[11px] font-semibold tracking-[0.12em] text-[#1a1916] uppercase hover:text-[#c9a96e] transition-colors [font-family:'DM_Sans',sans-serif]"
       >
         {title}
         <ChevronUp
-          className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${!open ? "rotate-180" : ""}`}
+          className={`w-3.5 h-3.5 text-[#9a9086] transition-transform duration-200 ${!open ? "rotate-180" : ""}`}
         />
       </button>
       <AnimatePresence initial={false}>
@@ -36,12 +36,10 @@ function FilterSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.22 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 border-t border-gray-50 pt-3">
-              {children}
-            </div>
+            <div className="pb-5">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -86,7 +84,6 @@ function ProductsContent() {
     if (categoryId) params.set("category_id", categoryId);
     if (minPrice) params.set("min_price", minPrice);
     if (maxPrice) params.set("max_price", maxPrice);
-
     api
       .get(`/products?${params}`)
       .then(({ data }) => {
@@ -117,41 +114,32 @@ function ProductsContent() {
   const currentCategory = categories.find((c) => c.id === categoryId);
 
   const SidebarContent = () => (
-    <>
+    <div className="[font-family:'DM_Sans',sans-serif]">
       <FilterSection title="Categories">
-        <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-          <label className="flex items-center gap-3 cursor-pointer group">
-            <input
-              type="radio"
-              name="category"
-              checked={!categoryId}
-              onChange={() => updateFilter("category_id", "")}
-              className="w-3.5 h-3.5 border-gray-300 text-[#ef4a23] focus:ring-[#ef4a23] cursor-pointer"
-            />
-            <span
-              className={`text-[13px] transition-colors ${!categoryId ? "font-bold text-[#ef4a23]" : "text-gray-700 group-hover:text-[#ef4a23]"}`}
-            >
-              All Categories
-            </span>
-          </label>
-          {categories.map((cat) => (
+        <div className="flex flex-col gap-2.5 max-h-72 overflow-y-auto pr-1">
+          {[{ id: "", name: "All Categories" }, ...categories].map((cat) => (
             <label
               key={cat.id}
               className="flex items-center gap-3 cursor-pointer group"
             >
-              <input
-                type="radio"
-                name="category"
-                checked={categoryId === cat.id}
-                onChange={() => {
+              <span
+                onClick={() => {
                   updateFilter("category_id", cat.id);
                   setShowFilters(false);
                 }}
-                className="w-3.5 h-3.5 border-gray-300 text-[#ef4a23] focus:ring-[#ef4a23] cursor-pointer"
-              />
-              <span
-                className={`text-[13px] transition-colors ${categoryId === cat.id ? "font-bold text-[#ef4a23]" : "text-gray-700 group-hover:text-[#ef4a23]"}`}
+                className={`flex items-center gap-3 w-full text-[13px] transition-colors ${
+                  categoryId === cat.id || (!categoryId && cat.id === "")
+                    ? "text-[#c9a96e] font-semibold"
+                    : "text-[#6b6258] group-hover:text-[#1a1916]"
+                }`}
               >
+                <span
+                  className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${
+                    categoryId === cat.id || (!categoryId && cat.id === "")
+                      ? "bg-[#c9a96e]"
+                      : "bg-[#e0dbd4]"
+                  }`}
+                />
                 {cat.name}
               </span>
             </label>
@@ -160,112 +148,174 @@ function ProductsContent() {
       </FilterSection>
 
       <FilterSection title="Price Range">
-        {/* Visual Slider */}
-        <div className="relative h-1.5 mt-2 mb-6 bg-gray-200 rounded-full mx-2">
-          <div
-            className="absolute h-full bg-[#ef4a23] rounded-full"
-            style={{ left: "0%", right: "0%" }}
-          />
-          <div className="absolute left-[0%] top-1/2 -translate-y-1/2 w-[18px] h-[18px] bg-white border-4 border-[#ef4a23] rounded-full shadow-sm cursor-pointer" />
-          <div className="absolute right-[0%] top-1/2 -translate-y-1/2 w-[18px] h-[18px] bg-white border-4 border-[#ef4a23] rounded-full shadow-sm cursor-pointer" />
+        <div className="flex gap-2.5 mb-4">
+          <div className="flex-1">
+            <label className="text-[9.5px] font-semibold tracking-[0.1em] uppercase text-[#9a9086] mb-1.5 block">
+              Min
+            </label>
+            <input
+              type="number"
+              placeholder="0"
+              value={minPrice}
+              onChange={(e) => updateFilter("min_price", e.target.value)}
+              className="w-full text-[13px] text-[#1a1916] py-2 px-3 bg-white border border-[#ede9e2] outline-none focus:border-[#c9a96e] transition-colors placeholder:text-[#c4bcb2]"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-[9.5px] font-semibold tracking-[0.1em] uppercase text-[#9a9086] mb-1.5 block">
+              Max
+            </label>
+            <input
+              type="number"
+              placeholder="∞"
+              value={maxPrice}
+              onChange={(e) => updateFilter("max_price", e.target.value)}
+              className="w-full text-[13px] text-[#1a1916] py-2 px-3 bg-white border border-[#ede9e2] outline-none focus:border-[#c9a96e] transition-colors placeholder:text-[#c4bcb2]"
+            />
+          </div>
         </div>
-        <div className="flex gap-3 mb-4">
-          <input
-            type="number"
-            placeholder="0"
-            value={minPrice}
-            onChange={(e) => updateFilter("min_price", e.target.value)}
-            className="w-1/2 text-center text-[13px] font-medium py-1.5 border border-gray-300 outline-none focus:border-[#ef4a23]"
-          />
-          <input
-            type="number"
-            placeholder="279,999"
-            value={maxPrice}
-            onChange={(e) => updateFilter("max_price", e.target.value)}
-            className="w-1/2 text-center text-[13px] font-medium py-1.5 border border-gray-300 outline-none focus:border-[#ef4a23]"
-          />
-        </div>
-
-        {/* Quick Price Buttons */}
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-1.5">
           {[
             { label: "Under ৳1K", min: "", max: "1000" },
-            { label: "৳1K-5K", min: "1000", max: "5000" },
-            { label: "৳5K-20K", min: "5000", max: "20000" },
+            { label: "৳1K–5K", min: "1000", max: "5000" },
+            { label: "৳5K–20K", min: "5000", max: "20000" },
             { label: "৳20K+", min: "20000", max: "" },
           ].map((r) => (
             <button
               key={r.label}
               onClick={() => {
-                const params = new URLSearchParams(searchParams.toString());
-                params.set("min_price", r.min);
-                params.set("max_price", r.max);
-                params.set("page", "1");
-                router.push(`/products?${params}`);
+                const p = new URLSearchParams(searchParams.toString());
+                p.set("min_price", r.min);
+                p.set("max_price", r.max);
+                p.set("page", "1");
+                router.push(`/products?${p}`);
                 setShowFilters(false);
               }}
-              className="text-[11px] font-bold text-gray-500 bg-gray-50 px-2.5 py-1.5 border border-gray-200 hover:border-[#ef4a23] hover:text-[#ef4a23] transition-colors rounded-sm"
+              className="text-[10px] font-semibold text-[#6b6258] bg-[#faf8f5] border border-[#ede9e2] px-2.5 py-1.5 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
             >
               {r.label}
             </button>
           ))}
         </div>
       </FilterSection>
-    </>
+    </div>
   );
 
   return (
-    <div className="bg-[#f2f4f8] min-h-screen mt-2">
-      <div className="site-container py-8 page-enter">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-4 shadow-sm border border-gray-100">
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-              {currentCategory
-                ? currentCategory.name
-                : search
-                  ? `Results for "${search}"`
-                  : "All Products"}
-            </h1>
-            <p className="text-[13px] text-gray-500 mt-0.5">
-              {total} products found
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
+    <div className="bg-[#faf8f5] min-h-screen [font-family:'DM_Sans',sans-serif]">
+      {/* Page header */}
+      <div className="bg-[#1a1916] border-b border-[#2a2824]">
+        <div className="site-container py-8 md:py-10">
+          <p className="text-[#c9a96e] text-[10px] font-semibold tracking-[0.18em] uppercase mb-2 flex items-center gap-2">
+            <span className="inline-block w-4 h-px bg-[#c9a96e]" />
+            {currentCategory ? "Category" : search ? "Search" : "Catalogue"}
+          </p>
+          <h1 className="text-[clamp(1.8rem,4vw,3rem)] font-normal text-[#f5f0e8] [font-family:'Instrument_Serif',serif] leading-tight">
+            {currentCategory
+              ? currentCategory.name
+              : search
+                ? `"${search}"`
+                : "All Products"}
+          </h1>
+          <p className="text-[13px] text-[#6b6560] mt-1.5">{total} products</p>
+        </div>
+      </div>
+
+      <div className="site-container py-8">
+        {/* Toolbar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          {/* Active filters */}
+          {hasFilters ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-semibold tracking-[0.1em] text-[#9a9086] uppercase">
+                Filters:
+              </span>
+              {currentCategory && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#1a1916] text-[#c9a96e] text-[11px] font-medium">
+                  {currentCategory.name}
+                  <button
+                    onClick={() => updateFilter("category_id", "")}
+                    className="text-[#6b6560] hover:text-[#c9a96e] transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {search && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#1a1916] text-[#c9a96e] text-[11px] font-medium">
+                  &quot;{search}&quot;
+                  <button
+                    onClick={() => updateFilter("search", "")}
+                    className="text-[#6b6560] hover:text-[#c9a96e] transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {(minPrice || maxPrice) && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#1a1916] text-[#c9a96e] text-[11px] font-medium">
+                  ৳{minPrice || "0"} – {maxPrice || "∞"}
+                  <button
+                    onClick={() => {
+                      updateFilter("min_price", "");
+                      updateFilter("max_price", "");
+                    }}
+                    className="text-[#6b6560] hover:text-[#c9a96e] transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={clearFilters}
+                className="text-[11px] font-semibold text-[#9a9086] hover:text-[#c9a96e] uppercase tracking-[0.08em] transition-colors ml-1"
+              >
+                Clear all
+              </button>
+            </div>
+          ) : (
+            <div />
+          )}
+
+          {/* Right controls */}
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setShowFilters(true)}
-              className="flex items-center gap-2 bg-gray-100 px-4 py-2 hover:bg-gray-200 transition-colors font-semibold text-[13px] text-gray-800 md:hidden border border-gray-200"
+              className="flex items-center gap-2 bg-white border border-[#ede9e2] px-3.5 py-2 hover:border-[#c9a96e] transition-colors text-[12px] font-semibold text-[#1a1916] md:hidden"
             >
-              <SlidersHorizontal className="w-4 h-4" /> Filters
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              Filters
             </button>
+
             <select
               value={`${sortBy}-${sortOrder}`}
               onChange={(e) => {
                 const [sb, so] = e.target.value.split("-");
-                const params = new URLSearchParams(searchParams.toString());
-                params.set("sort_by", sb);
-                params.set("sort_order", so);
-                params.set("page", "1");
-                router.push(`/products?${params}`);
+                const p = new URLSearchParams(searchParams.toString());
+                p.set("sort_by", sb);
+                p.set("sort_order", so);
+                p.set("page", "1");
+                router.push(`/products?${p}`);
               }}
-              className="bg-gray-50 border border-gray-200 py-2 pl-3 pr-8 text-[13px] font-semibold text-gray-700 focus:outline-none focus:border-[#ef4a23]"
+              className="bg-white border border-[#ede9e2] py-2 pl-3 pr-8 text-[12px] font-medium text-[#1a1916] focus:outline-none focus:border-[#c9a96e] appearance-none transition-colors"
             >
               <option value="created_at-desc">Newest First</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="name-asc">Name: A-Z</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="name-asc">Name: A–Z</option>
               <option value="average_rating-desc">Top Rated</option>
             </select>
-            <div className="hidden sm:flex items-center border border-gray-200 bg-gray-50 p-0.5">
+
+            <div className="hidden sm:flex items-center border border-[#ede9e2] bg-white">
               <button
                 onClick={() => setGrid(true)}
-                className={`p-1.5 transition-colors ${grid ? "bg-white shadow-sm border border-gray-200 text-black" : "text-gray-400"}`}
+                className={`p-2 transition-colors ${grid ? "bg-[#1a1916] text-[#c9a96e]" : "text-[#9a9086] hover:text-[#1a1916]"}`}
               >
                 <Grid3X3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setGrid(false)}
-                className={`p-1.5 transition-colors ${!grid ? "bg-white shadow-sm border border-gray-200 text-black" : "text-gray-400"}`}
+                className={`p-2 transition-colors ${!grid ? "bg-[#1a1916] text-[#c9a96e]" : "text-[#9a9086] hover:text-[#1a1916]"}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -273,62 +323,18 @@ function ProductsContent() {
           </div>
         </div>
 
-        {/* Active Filters */}
-        {hasFilters && (
-          <div className="flex items-center gap-2 mb-5 flex-wrap">
-            <span className="text-[13px] font-bold text-gray-500">Active:</span>
-            {currentCategory && (
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 text-[13px] font-bold text-gray-800 shadow-sm">
-                {currentCategory.name}
-                <button
-                  onClick={() => updateFilter("category_id", "")}
-                  className="text-gray-400 hover:text-red-500"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            )}
-            {search && (
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 text-[13px] font-bold text-gray-800 shadow-sm">
-                &quot;{search}&quot;
-                <button
-                  onClick={() => updateFilter("search", "")}
-                  className="text-gray-400 hover:text-red-500"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            )}
-            {(minPrice || maxPrice) && (
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 text-[13px] font-bold text-gray-800 shadow-sm">
-                ৳{minPrice || "0"} - ৳{maxPrice || "∞"}
-                <button
-                  onClick={() => {
-                    updateFilter("min_price", "");
-                    updateFilter("max_price", "");
-                  }}
-                  className="text-gray-400 hover:text-red-500"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            )}
-            <button
-              onClick={clearFilters}
-              className="text-[12px] font-bold text-red-500 hover:underline uppercase tracking-wide ml-2"
-            >
-              Clear all
-            </button>
-          </div>
-        )}
-
-        <div className="flex gap-6">
-          {/* Desktop Sidebar */}
-          <aside className="hidden md:block w-[240px] flex-shrink-0">
-            {SidebarContent()}
+        <div className="flex gap-8">
+          {/* ── Desktop Sidebar ── */}
+          <aside className="hidden md:block w-[220px] flex-shrink-0">
+            <div className="bg-white border border-[#ede9e2] p-5">
+              <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-[#c9a96e] mb-4">
+                Refine
+              </p>
+              <SidebarContent />
+            </div>
           </aside>
 
-          {/* Mobile Drawer */}
+          {/* ── Mobile Drawer ── */}
           <AnimatePresence>
             {showFilters && (
               <>
@@ -337,33 +343,33 @@ function ProductsContent() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setShowFilters(false)}
-                  className="fixed inset-0 bg-black/60 z-[100] md:hidden"
+                  className="fixed inset-0 bg-[#1a1916]/70 z-[100] md:hidden"
                 />
                 <motion.div
                   initial={{ x: "100%" }}
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="fixed top-0 bottom-0 right-0 w-[300px] bg-[#f2f4f8] z-[101] shadow-2xl md:hidden overflow-hidden flex flex-col"
+                  transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                  className="fixed top-0 bottom-0 right-0 w-[300px] bg-[#faf8f5] z-[101] shadow-2xl md:hidden flex flex-col"
                 >
-                  <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 shadow-sm z-10">
-                    <h3 className="font-extrabold text-[15px] uppercase tracking-wide text-gray-900">
-                      Filters
-                    </h3>
+                  <div className="flex items-center justify-between px-5 py-4 bg-[#1a1916] border-b border-[#2a2824]">
+                    <p className="text-[11px] font-semibold tracking-[0.14em] text-[#c9a96e] uppercase">
+                      Refine
+                    </p>
                     <button
                       onClick={() => setShowFilters(false)}
-                      className="p-1 text-gray-500 hover:bg-gray-100 transition-colors"
+                      className="text-[#6b6560] hover:text-[#f5f0e8] transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-3">
-                    {SidebarContent()}
+                  <div className="flex-1 overflow-y-auto p-5">
+                    <SidebarContent />
                   </div>
-                  <div className="p-4 bg-white border-t border-gray-100">
+                  <div className="p-4 border-t border-[#ede9e2]">
                     <button
-                      onClick={clearFilters}
-                      className="w-full bg-[#ef4a23] text-white py-3 text-[13px] font-bold uppercase tracking-wide hover:bg-black transition-colors"
+                      onClick={() => setShowFilters(false)}
+                      className="w-full bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] py-3 text-[12px] font-semibold uppercase tracking-[0.1em] transition-colors"
                     >
                       Apply Filters
                     </button>
@@ -373,33 +379,32 @@ function ProductsContent() {
             )}
           </AnimatePresence>
 
-          {/* Products Grid */}
+          {/* ── Products Grid ── */}
           <div className="flex-1 min-w-0">
             {loading ? (
               <div
-                className={`grid ${grid ? "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-3`}
+                className={`grid ${grid ? "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-4`}
               >
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
-                    className="animate-pulse bg-white border border-gray-100"
-                    style={{
-                      aspectRatio: grid ? "auto" : "4/1",
-                      height: grid ? "320px" : "140px",
-                    }}
+                    className="animate-pulse bg-white border border-[#ede9e2]"
+                    style={{ height: grid ? "320px" : "140px" }}
                   />
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-20 bg-white border border-gray-100 shadow-sm">
-                <div className="text-5xl mb-4">🔍</div>
-                <h3 className="text-lg font-bold mb-2">No products found</h3>
-                <p className="text-gray-500 text-[13px] mb-6">
+              <div className="text-center py-24 bg-white border border-[#ede9e2]">
+                <div className="text-4xl mb-4 opacity-30">◎</div>
+                <h3 className="text-[18px] font-normal text-[#1a1916] [font-family:'Instrument_Serif',serif] mb-2">
+                  No products found
+                </h3>
+                <p className="text-[13px] text-[#9a9086] mb-8 font-light">
                   Try adjusting your filters or search terms
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="bg-black text-white px-6 py-2.5 text-[13px] font-bold uppercase tracking-wide hover:bg-[#ef4a23] transition-colors"
+                  className="bg-[#1a1916] text-[#f5f0e8] hover:bg-[#c9a96e] hover:text-[#1a1916] px-8 py-3 text-[12px] font-semibold uppercase tracking-[0.1em] transition-colors"
                 >
                   Clear Filters
                 </button>
@@ -411,9 +416,10 @@ function ProductsContent() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
                 >
                   <div
-                    className={`grid ${grid ? "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-3`}
+                    className={`grid ${grid ? "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-4`}
                   >
                     {products.map((product, i) => (
                       <ProductCard
@@ -427,17 +433,17 @@ function ProductsContent() {
               </AnimatePresence>
             )}
 
-            {/* Pagination */}
+            {/* ── Pagination ── */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-1.5 mt-10">
+              <div className="flex justify-center items-center gap-1 mt-12">
                 <button
                   onClick={() =>
                     updateFilter("page", String(Math.max(1, page - 1)))
                   }
                   disabled={page === 1}
-                  className="bg-white border border-gray-200 px-3 py-1.5 text-[12px] font-bold disabled:opacity-40 hover:bg-gray-50"
+                  className="bg-white border border-[#ede9e2] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1a1916] disabled:opacity-30 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
                 >
-                  PREV
+                  Prev
                 </button>
                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                   let p: number;
@@ -449,7 +455,11 @@ function ProductsContent() {
                     <button
                       key={p}
                       onClick={() => updateFilter("page", String(p))}
-                      className={`w-8 h-8 flex items-center justify-center text-[13px] font-bold transition-all ${p === page ? "bg-[#ef4a23] text-white border border-[#ef4a23]" : "bg-white border border-gray-200 hover:border-gray-400"}`}
+                      className={`w-9 h-9 flex items-center justify-center text-[12px] font-semibold transition-all ${
+                        p === page
+                          ? "bg-[#1a1916] text-[#c9a96e] border border-[#1a1916]"
+                          : "bg-white border border-[#ede9e2] text-[#1a1916] hover:border-[#c9a96e] hover:text-[#c9a96e]"
+                      }`}
                     >
                       {p}
                     </button>
@@ -460,9 +470,9 @@ function ProductsContent() {
                     updateFilter("page", String(Math.min(totalPages, page + 1)))
                   }
                   disabled={page === totalPages}
-                  className="bg-white border border-gray-200 px-3 py-1.5 text-[12px] font-bold disabled:opacity-40 hover:bg-gray-50"
+                  className="bg-white border border-[#ede9e2] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1a1916] disabled:opacity-30 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
                 >
-                  NEXT
+                  Next
                 </button>
               </div>
             )}
@@ -477,19 +487,17 @@ export default function ProductsPage() {
   return (
     <Suspense
       fallback={
-        <div className="bg-[#f2f4f8] min-h-screen py-8">
-          <div className="site-container">
-            <div className="animate-pulse h-12 w-full bg-white mb-6 border border-gray-100" />
-            <div className="flex gap-6">
-              <div className="hidden md:block w-60 animate-pulse h-150 bg-white border border-gray-100" />
-              <div className="flex-1 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="animate-pulse bg-white border border-gray-100 h-80"
-                  />
-                ))}
-              </div>
+        <div className="bg-[#faf8f5] min-h-screen">
+          <div className="bg-[#1a1916] h-32 animate-pulse" />
+          <div className="site-container py-8 flex gap-8">
+            <div className="hidden md:block w-[220px] h-96 animate-pulse bg-white border border-[#ede9e2]" />
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse bg-white border border-[#ede9e2] h-80"
+                />
+              ))}
             </div>
           </div>
         </div>
