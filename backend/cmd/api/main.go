@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -107,8 +108,33 @@ func main() {
 	gin.SetMode(cfg.GinMode)
 	r := gin.Default()
 
+	// ✅ PUT CORS HERE (RIGHT AFTER gin.Default)
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"https://go-next-supabase.vercel.app",
+			"http://localhost:3000",
+		},
+		AllowMethods: []string{
+			"GET", "POST", "PUT", "DELETE", "OPTIONS",
+		},
+		AllowHeaders: []string{
+			"Origin",
+			"Content-Type",
+			"Authorization",
+			"X-Session-ID",
+		},
+		ExposeHeaders: []string{
+			"Content-Length",
+		},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	r.OPTIONS("/*path", func(c *gin.Context) {
+		c.Status(204)
+	})
+
 	// Global middleware
-	r.Use(middleware.CORSMiddleware(cfg.FrontendURL))
+	// r.Use(middleware.CORSMiddleware(cfg.FrontendURL))
 	r.Use(middleware.RateLimitMiddleware(1000, time.Minute))
 
 	// Health check endpoint with Redis status
