@@ -311,7 +311,7 @@ export default function HomePage() {
                   <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#c9a96e] scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-bottom" />
 
                   <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-                    <h3 className="text-[12px] font-medium text-[#f5f0e8] leading-tight group-hover:text-[#c9a96e] transition-colors duration-200 [font-family:'DM_Sans',sans-serif]">
+                    <h3 className="text-[12px] font-medium text-[#f5f0e8] leading-tight group-hover:text-[#c9a96e] transition-colors duration-200 ">
                       {cat.name}
                     </h3>
                   </div>
@@ -461,7 +461,7 @@ export default function HomePage() {
                 <item.icon className="w-4 h-4 text-[#c9a96e]" />
               </div>
               <div>
-                <p className="text-[13px] font-medium text-[#1a1916] [font-family:'DM_Sans',sans-serif]">
+                <p className="text-[13px] font-medium text-[#1a1916] ">
                   {item.label}
                 </p>
                 <p className="text-[11px] text-[#9a9086] font-light mt-0.5">

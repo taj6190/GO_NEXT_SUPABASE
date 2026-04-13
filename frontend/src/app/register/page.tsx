@@ -123,7 +123,7 @@ export default function RegisterPage() {
             <br />
             <em className="italic text-[#c9a96e]">starts here.</em>
           </h1>
-          <p className="text-[15px] font-light leading-[1.8] text-[#a09a8e] max-w-[320px] [font-family:'DM_Sans',sans-serif]">
+          <p className="text-[15px] font-light leading-[1.8] text-[#a09a8e] max-w-[320px] ">
             Create a free account and unlock the full ShopVerse experience —
             faster checkout, order tracking, and exclusive deals.
           </p>
@@ -137,10 +137,10 @@ export default function RegisterPage() {
                 <Check className="w-[13px] h-[13px] text-[#c9a96e] stroke-[2.5]" />
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13px] font-medium text-[#f5f0e8] leading-snug [font-family:'DM_Sans',sans-serif]">
+                <span className="text-[13px] font-medium text-[#f5f0e8] leading-snug ">
                   {perk.title}
                 </span>
-                <span className="text-[12px] font-light text-[#6b6560] leading-snug [font-family:'DM_Sans',sans-serif]">
+                <span className="text-[12px] font-light text-[#6b6560] leading-snug ">
                   {perk.sub}
                 </span>
               </div>
@@ -154,14 +154,14 @@ export default function RegisterPage() {
         <div className="w-full max-w-sm">
           {/* Header */}
           <div className="mb-8">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-[5px] rounded-full bg-[#f0e9db] border border-[#e0d5c4] text-[#8b7355] text-[11px] font-medium tracking-[0.12em] uppercase mb-5 [font-family:'DM_Sans',sans-serif]">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-[5px] rounded-full bg-[#f0e9db] border border-[#e0d5c4] text-[#8b7355] text-[11px] font-medium tracking-[0.12em] uppercase mb-5 ">
               <span className="w-[5px] h-[5px] rounded-full bg-[#c9a96e]" />
               Free forever
             </span>
             <h2 className="text-[2.4rem] font-normal leading-[1.15] tracking-[-0.02em] text-[#1a1916] [font-family:'Instrument_Serif',serif] m-0 mb-1.5">
               Create account
             </h2>
-            <p className="text-[14px] font-light text-[#8a8278] m-0 leading-relaxed [font-family:'DM_Sans',sans-serif]">
+            <p className="text-[14px] font-light text-[#8a8278] m-0 leading-relaxed ">
               Takes less than a minute to get started.
             </p>
           </div>
@@ -172,7 +172,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-3">
               {/* Full Name */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] [font-family:'DM_Sans',sans-serif]">
+                <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] ">
                   Full Name
                 </label>
                 <div className="relative">
@@ -185,14 +185,14 @@ export default function RegisterPage() {
                     }
                     placeholder="Your name"
                     required
-                    className="w-full h-[50px] pl-9 pr-3 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[13px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 [font-family:'DM_Sans',sans-serif]"
+                    className="w-full h-[50px] pl-9 pr-3 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[13px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 "
                   />
                 </div>
               </div>
 
               {/* Phone */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] [font-family:'DM_Sans',sans-serif]">
+                <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] ">
                   Phone
                 </label>
                 <div className="relative">
@@ -204,7 +204,7 @@ export default function RegisterPage() {
                       setForm({ ...form, phone: e.target.value })
                     }
                     placeholder="+880 17…"
-                    className="w-full h-[50px] pl-9 pr-3 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[13px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 [font-family:'DM_Sans',sans-serif]"
+                    className="w-full h-[50px] pl-9 pr-3 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[13px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 "
                   />
                 </div>
               </div>
@@ -212,7 +212,7 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] [font-family:'DM_Sans',sans-serif]">
+              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] ">
                 Email address
               </label>
               <div className="relative">
@@ -223,14 +223,14 @@ export default function RegisterPage() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="you@example.com"
                   required
-                  className="w-full h-[50px] pl-10 pr-4 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 [font-family:'DM_Sans',sans-serif]"
+                  className="w-full h-[50px] pl-10 pr-4 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 "
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] [font-family:'DM_Sans',sans-serif]">
+              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] ">
                 Password
               </label>
               <div className="relative">
