@@ -129,12 +129,9 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-	r.OPTIONS("/*path", func(c *gin.Context) {
-		c.Status(204)
-	})
 
 	// Global middleware
-	// r.Use(middleware.CORSMiddleware(cfg.FrontendURL))
+	r.Use(middleware.CORSMiddleware(cfg.FrontendURL))
 	r.Use(middleware.RateLimitMiddleware(1000, time.Minute))
 
 	// Health check endpoint with Redis status
