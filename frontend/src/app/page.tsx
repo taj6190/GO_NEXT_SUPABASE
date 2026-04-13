@@ -56,7 +56,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="pb-24 [font-family:'DM_Sans',sans-serif] bg-[#faf8f5]">
+    <div className="pb-24 font-['DM_Sans',sans-serif] bg-[#faf8f5]">
       {/* ════════════════════════════════════
           HERO — full-bleed dark editorial
       ════════════════════════════════════ */}
@@ -254,26 +254,26 @@ export default function HomePage() {
       {categories.length > 0 && (
         <section className="site-container py-16 md:py-20">
           {/* Section header */}
-          <div className="flex items-end justify-between mb-10">
+          <div className="flex items-end justify-between  mt-10">
             <div>
               <p className="text-[#c9a96e] text-[11px] font-semibold tracking-[0.18em] uppercase mb-2 flex items-center gap-2">
                 <span className="inline-block w-5 h-px bg-[#c9a96e]" />
                 Collections
               </p>
-              <h2 className="text-[clamp(1.8rem,3.5vw,2.6rem)] font-normal text-[#1a1916] [font-family:'Instrument_Serif',serif] leading-tight">
+              <h2 className="text-[clamp(1.8rem,3.5vw,2.6rem)] font-normal text-[#1a1916] font-['Instrument_Serif',serif] leading-tight mb-10">
                 Shop by Category
               </h2>
             </div>
             <Link
               href="/products"
-              className="hidden sm:inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#1a1916] hover:text-[#c9a96e] uppercase tracking-[0.1em] transition-colors border-b border-[#1a1916] hover:border-[#c9a96e] pb-0.5"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#1a1916] hover:text-[#c9a96e] uppercase tracking-widest transition-colors border-b border-[#1a1916] hover:border-[#c9a96e] pb-0.5"
             >
               All Categories <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {/* Category grid — mixed sizes for editorial feel */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-8 xl:grid-cols-8 gap-3">
             {categories.slice(0, 12).map((cat, i) => (
               <motion.div
                 key={cat.id}
@@ -294,7 +294,7 @@ export default function HomePage() {
                       src={cat.image_url}
                       alt={cat.name}
                       fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-[1s] ease-out"
+                      className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
                       sizes="(max-width: 640px) 50vw, 20vw"
                     />
                   ) : (
@@ -325,7 +325,7 @@ export default function HomePage() {
           FEATURED PRODUCTS
       ════════════════════════════════════ */}
       {featured.length > 0 && (
-        <section className="bg-[#f5f1eb] border-y border-[#ede9e2] py-16 md:py-20">
+        <section className="bg-[#f5f1eb] mt-10 border-y border-[#ede9e2] py-16 md:py-20">
           <div className="site-container">
             <div className="flex items-end justify-between mb-10">
               <div>

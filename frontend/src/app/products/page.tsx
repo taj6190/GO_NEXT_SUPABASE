@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
@@ -23,7 +24,7 @@ function FilterSection({
     <div className="border-b border-[#ede9e2] last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-0 py-4 text-[11px] font-semibold tracking-[0.12em] text-[#1a1916] uppercase hover:text-[#c9a96e] transition-colors [font-family:'DM_Sans',sans-serif]"
+        className="w-full flex items-center justify-between px-0 py-4 text-[11px] font-semibold tracking-[0.12em] text-[#1a1916] uppercase hover:text-[#c9a96e] transition-colors font-['DM_Sans',sans-serif]"
       >
         {title}
         <ChevronUp
@@ -114,7 +115,7 @@ function ProductsContent() {
   const currentCategory = categories.find((c) => c.id === categoryId);
 
   const SidebarContent = () => (
-    <div className="[font-family:'DM_Sans',sans-serif]">
+    <div className="font-['DM_Sans',sans-serif]">
       <FilterSection title="Categories">
         <div className="flex flex-col gap-2.5 max-h-72 overflow-y-auto pr-1">
           {[{ id: "", name: "All Categories" }, ...categories].map((cat) => (
@@ -134,7 +135,7 @@ function ProductsContent() {
                 }`}
               >
                 <span
-                  className={`w-1 h-1 rounded-full flex-shrink-0 transition-colors ${
+                  className={`w-1 h-1 rounded-full shrink-0 transition-colors ${
                     categoryId === cat.id || (!categoryId && cat.id === "")
                       ? "bg-[#c9a96e]"
                       : "bg-[#e0dbd4]"
@@ -150,7 +151,7 @@ function ProductsContent() {
       <FilterSection title="Price Range">
         <div className="flex gap-2.5 mb-4">
           <div className="flex-1">
-            <label className="text-[9.5px] font-semibold tracking-[0.1em] uppercase text-[#9a9086] mb-1.5 block">
+            <label className="text-[9.5px] font-semibold tracking-widest uppercase text-[#9a9086] mb-1.5 block">
               Min
             </label>
             <input
@@ -162,7 +163,7 @@ function ProductsContent() {
             />
           </div>
           <div className="flex-1">
-            <label className="text-[9.5px] font-semibold tracking-[0.1em] uppercase text-[#9a9086] mb-1.5 block">
+            <label className="text-[9.5px] font-semibold tracking-widest uppercase text-[#9a9086] mb-1.5 block">
               Max
             </label>
             <input
@@ -202,7 +203,7 @@ function ProductsContent() {
   );
 
   return (
-    <div className="bg-[#faf8f5] min-h-screen [font-family:'DM_Sans',sans-serif]">
+    <div className="bg-[#faf8f5] min-h-screen font-['DM_Sans',sans-serif]">
       {/* Page header */}
       <div className="bg-[#1a1916] border-b border-[#2a2824]">
         <div className="site-container py-8 md:py-10">
@@ -210,7 +211,7 @@ function ProductsContent() {
             <span className="inline-block w-4 h-px bg-[#c9a96e]" />
             {currentCategory ? "Category" : search ? "Search" : "Catalogue"}
           </p>
-          <h1 className="text-[clamp(1.8rem,4vw,3rem)] font-normal text-[#f5f0e8] [font-family:'Instrument_Serif',serif] leading-tight">
+          <h1 className="text-[clamp(1.8rem,4vw,3rem)] font-normal text-[#f5f0e8] font-['Instrument_Serif',serif] leading-tight">
             {currentCategory
               ? currentCategory.name
               : search
@@ -227,7 +228,7 @@ function ProductsContent() {
           {/* Active filters */}
           {hasFilters ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-semibold tracking-[0.1em] text-[#9a9086] uppercase">
+              <span className="text-[10px] font-semibold tracking-widest text-[#9a9086] uppercase">
                 Filters:
               </span>
               {currentCategory && (
@@ -325,7 +326,7 @@ function ProductsContent() {
 
         <div className="flex gap-8">
           {/* ── Desktop Sidebar ── */}
-          <aside className="hidden md:block w-[220px] flex-shrink-0">
+          <aside className="hidden md:block w-55 shrink-0">
             <div className="bg-white border border-[#ede9e2] p-5">
               <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-[#c9a96e] mb-4">
                 Refine
@@ -343,14 +344,14 @@ function ProductsContent() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setShowFilters(false)}
-                  className="fixed inset-0 bg-[#1a1916]/70 z-[100] md:hidden"
+                  className="fixed inset-0 bg-[#1a1916]/70 z-100 md:hidden"
                 />
                 <motion.div
                   initial={{ x: "100%" }}
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
                   transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-                  className="fixed top-0 bottom-0 right-0 w-[300px] bg-[#faf8f5] z-[101] shadow-2xl md:hidden flex flex-col"
+                  className="fixed top-0 bottom-0 right-0 w-75 bg-[#faf8f5] z-101 shadow-2xl md:hidden flex flex-col"
                 >
                   <div className="flex items-center justify-between px-5 py-4 bg-[#1a1916] border-b border-[#2a2824]">
                     <p className="text-[11px] font-semibold tracking-[0.14em] text-[#c9a96e] uppercase">
@@ -369,7 +370,7 @@ function ProductsContent() {
                   <div className="p-4 border-t border-[#ede9e2]">
                     <button
                       onClick={() => setShowFilters(false)}
-                      className="w-full bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] py-3 text-[12px] font-semibold uppercase tracking-[0.1em] transition-colors"
+                      className="w-full bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] py-3 text-[12px] font-semibold uppercase tracking-widest transition-colors"
                     >
                       Apply Filters
                     </button>
@@ -396,7 +397,7 @@ function ProductsContent() {
             ) : products.length === 0 ? (
               <div className="text-center py-24 bg-white border border-[#ede9e2]">
                 <div className="text-4xl mb-4 opacity-30">◎</div>
-                <h3 className="text-[18px] font-normal text-[#1a1916] [font-family:'Instrument_Serif',serif] mb-2">
+                <h3 className="text-[18px] font-normal text-[#1a1916] font-['Instrument_Serif',serif] mb-2">
                   No products found
                 </h3>
                 <p className="text-[13px] text-[#9a9086] mb-8 font-light">
@@ -404,7 +405,7 @@ function ProductsContent() {
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="bg-[#1a1916] text-[#f5f0e8] hover:bg-[#c9a96e] hover:text-[#1a1916] px-8 py-3 text-[12px] font-semibold uppercase tracking-[0.1em] transition-colors"
+                  className="bg-[#1a1916] text-[#f5f0e8] hover:bg-[#c9a96e] hover:text-[#1a1916] px-8 py-3 text-[12px] font-semibold uppercase tracking-widest transition-colors"
                 >
                   Clear Filters
                 </button>
@@ -441,7 +442,7 @@ function ProductsContent() {
                     updateFilter("page", String(Math.max(1, page - 1)))
                   }
                   disabled={page === 1}
-                  className="bg-white border border-[#ede9e2] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1a1916] disabled:opacity-30 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
+                  className="bg-white border border-[#ede9e2] px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-[#1a1916] disabled:opacity-30 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
                 >
                   Prev
                 </button>
@@ -470,7 +471,7 @@ function ProductsContent() {
                     updateFilter("page", String(Math.min(totalPages, page + 1)))
                   }
                   disabled={page === totalPages}
-                  className="bg-white border border-[#ede9e2] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1a1916] disabled:opacity-30 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
+                  className="bg-white border border-[#ede9e2] px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-[#1a1916] disabled:opacity-30 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
                 >
                   Next
                 </button>
@@ -490,7 +491,7 @@ export default function ProductsPage() {
         <div className="bg-[#faf8f5] min-h-screen">
           <div className="bg-[#1a1916] h-32 animate-pulse" />
           <div className="site-container py-8 flex gap-8">
-            <div className="hidden md:block w-[220px] h-96 animate-pulse bg-white border border-[#ede9e2]" />
+            <div className="hidden md:block w-55 h-96 animate-pulse bg-white border border-[#ede9e2]" />
             <div className="flex-1 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div

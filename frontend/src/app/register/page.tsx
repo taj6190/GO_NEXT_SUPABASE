@@ -107,7 +107,7 @@ export default function RegisterPage() {
         {/* Brand mark */}
         <div className="relative z-10 flex items-center gap-2.5">
           <span className="w-2.5 h-2.5 rounded-full bg-[#c9a96e]" />
-          <span className="text-[#c9a96e] text-[13px] font-medium tracking-[0.14em] uppercase [font-family:'DM_Sans',sans-serif]">
+          <span className="text-[#c9a96e] text-[13px] font-medium tracking-[0.14em] uppercase font-['DM_Sans',sans-serif]">
             ShopVerse BD
           </span>
         </div>
@@ -118,7 +118,7 @@ export default function RegisterPage() {
             <span className="inline-block w-7 h-px bg-[#c9a96e]" />
             Join us today
           </p>
-          <h1 className="text-[clamp(3rem,5.5vw,4.75rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[#f5f0e8] [font-family:'Instrument_Serif',serif] m-0">
+          <h1 className="text-[clamp(3rem,5.5vw,4.75rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[#f5f0e8] font-['Instrument_Serif',serif] m-0">
             Your journey
             <br />
             <em className="italic text-[#c9a96e]">starts here.</em>
@@ -244,7 +244,7 @@ export default function RegisterPage() {
                   placeholder="Min 6 characters"
                   required
                   minLength={6}
-                  className="w-full h-[50px] pl-10 pr-11 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 [font-family:'DM_Sans',sans-serif]"
+                  className="w-full h-12.5 pl-10 pr-11 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 font-['DM_Sans',sans-serif]"
                 />
                 <button
                   type="button"
@@ -253,9 +253,9 @@ export default function RegisterPage() {
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0a898] hover:text-[#6b6258] transition-colors duration-150 p-1"
                 >
                   {showPass ? (
-                    <EyeOff className="w-[15px] h-[15px]" />
+                    <EyeOff className="w-3.75 h-3.75" />
                   ) : (
-                    <Eye className="w-[15px] h-[15px]" />
+                    <Eye className="w-3.75 h-3.75" />
                   )}
                 </button>
               </div>
@@ -265,9 +265,9 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="relative w-full h-[52px] mt-1 bg-[#1a1916] hover:bg-[#2d2b28] disabled:opacity-60 disabled:cursor-not-allowed rounded-[10px] flex items-center justify-center gap-2.5 text-[14px] font-medium tracking-[0.04em] text-[#f5f0e8] overflow-hidden transition-all duration-150 hover:-translate-y-px active:translate-y-0 [font-family:'DM_Sans',sans-serif]"
+              className="relative w-full h-13 mt-1 bg-[#1a1916] hover:bg-[#2d2b28] disabled:opacity-60 disabled:cursor-not-allowed rounded-[10px] flex items-center justify-center gap-2.5 text-[14px] font-medium tracking-[0.04em] text-[#f5f0e8] overflow-hidden transition-all duration-150 hover:-translate-y-px active:translate-y-0 font-['DM_Sans',sans-serif]"
             >
-              <span className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[#c9a96e]/15 pointer-events-none" />
+              <span className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-[#c9a96e]/15 pointer-events-none" />
               {loading ? (
                 <>
                   <span className="w-4 h-4 rounded-full border-2 border-[#f5f0e8]/30 border-t-[#f5f0e8] animate-spin" />
@@ -276,13 +276,13 @@ export default function RegisterPage() {
               ) : (
                 <>
                   Create Account
-                  <ArrowRight className="w-[15px] h-[15px]" />
+                  <ArrowRight className="w-3.75 h-3.75" />
                 </>
               )}
             </button>
 
             {/* Terms */}
-            <p className="text-center text-[11px] text-[#b0a898] leading-relaxed [font-family:'DM_Sans',sans-serif]">
+            <p className="text-center text-[11px] text-[#b0a898] leading-relaxed font-['DM_Sans',sans-serif]">
               By signing up you agree to our{" "}
               <Link
                 href="/terms"
@@ -303,7 +303,7 @@ export default function RegisterPage() {
 
           {/* Footer link */}
           <div className="mt-6 text-center">
-            <p className="text-[13px] text-[#8a8278] [font-family:'DM_Sans',sans-serif]">
+            <p className="text-[13px] text-[#8a8278] font-['DM_Sans',sans-serif]">
               Already have an account?{" "}
               <Link
                 href="/login"

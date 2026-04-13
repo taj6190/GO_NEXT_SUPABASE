@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
 interface GalleryImage {
   id?: string;
@@ -17,7 +17,12 @@ interface Props {
   onIndexChange?: (i: number) => void;
 }
 
-export default function ImageGallery({ images, alt, activeIndex, onIndexChange }: Props) {
+export default function ImageGallery({
+  images,
+  alt,
+  activeIndex,
+  onIndexChange,
+}: Props) {
   const [internalIdx, setInternalIdx] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
@@ -59,17 +64,30 @@ export default function ImageGallery({ images, alt, activeIndex, onIndexChange }
           alt={alt}
           fill
           className="object-cover transition-transform duration-300"
-          style={zoomed ? { transform: `scale(2)`, transformOrigin: `${mousePos.x}% ${mousePos.y}%` } : {}}
+          style={
+            zoomed
+              ? {
+                  transform: `scale(2)`,
+                  transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
+                }
+              : {}
+          }
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
         />
 
         {images.length > 1 && (
           <>
-            <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70">
+            <button
+              onClick={prev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+            >
               <ChevronLeft size={18} />
             </button>
-            <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70">
+            <button
+              onClick={next}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+            >
               <ChevronRight size={18} />
             </button>
           </>
@@ -89,7 +107,13 @@ export default function ImageGallery({ images, alt, activeIndex, onIndexChange }
               onClick={() => setIdx(i)}
               className={`gallery-thumb ${i === idx ? "active" : ""}`}
             >
-              <Image src={img.image_url} alt="" fill className="object-cover" sizes="72px" />
+              <Image
+                src={img.image_url}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="72px"
+              />
             </button>
           ))}
         </div>

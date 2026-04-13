@@ -88,7 +88,7 @@ export default function LoginPage() {
         {/* Brand mark */}
         <div className="relative z-10 flex items-center gap-2.5">
           <span className="w-2.5 h-2.5 rounded-full bg-[#c9a96e]" />
-          <span className="text-[#c9a96e] text-[13px] font-medium tracking-[0.14em] uppercase [font-family:'DM_Sans',sans-serif]">
+          <span className="text-[#c9a96e] text-[13px] font-medium tracking-[0.14em] uppercase font-['DM_Sans',sans-serif]">
             ShopVerse BD
           </span>
         </div>
@@ -99,12 +99,12 @@ export default function LoginPage() {
             <span className="inline-block w-7 h-px bg-[#c9a96e]" />
             Your marketplace
           </p>
-          <h1 className="text-[clamp(3rem,5.5vw,4.75rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[#f5f0e8] [font-family:'Instrument_Serif',serif] m-0">
+          <h1 className="text-[clamp(3rem,5.5vw,4.75rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[#f5f0e8] font-['Instrument_Serif',serif] m-0">
             Shop smarter,
             <br />
             <em className="italic text-[#c9a96e]">live better.</em>
           </h1>
-          <p className="text-[15px] font-light leading-[1.8] text-[#a09a8e] max-w-[320px] [font-family:'DM_Sans',sans-serif]">
+          <p className="text-[15px] font-light leading-[1.8] text-[#a09a8e] max-w-[320px] font-['DM_Sans',sans-serif]">
             Discover thousands of products, from everyday essentials to premium
             finds — delivered across Bangladesh.
           </p>
@@ -120,10 +120,10 @@ export default function LoginPage() {
             <div key={s.label} className="flex items-center">
               {i > 0 && <div className="w-px h-9 bg-[#2a2824] mx-6" />}
               <div className="flex flex-col gap-0.5">
-                <span className="text-[#f5f0e8] text-[1.5rem] leading-none [font-family:'Instrument_Serif',serif]">
+                <span className="text-[#f5f0e8] text-[1.5rem] leading-none font-['Instrument_Serif',serif]">
                   {s.num}
                 </span>
-                <span className="text-[#6b6560] text-[11px] uppercase tracking-[0.1em] font-normal [font-family:'DM_Sans',sans-serif]">
+                <span className="text-[#6b6560] text-[11px] uppercase tracking-widest font-normal font-['DM_Sans',sans-serif]">
                   {s.label}
                 </span>
               </div>
@@ -137,14 +137,14 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Header */}
           <div className="mb-9">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-[5px] rounded-full bg-[#f0e9db] border border-[#e0d5c4] text-[#8b7355] text-[11px] font-medium tracking-[0.12em] uppercase mb-5 [font-family:'DM_Sans',sans-serif]">
-              <span className="w-[5px] h-[5px] rounded-full bg-[#c9a96e]" />
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.25 rounded-full bg-[#f0e9db] border border-[#e0d5c4] text-[#8b7355] text-[11px] font-medium tracking-[0.12em] uppercase mb-5 font-['DM_Sans',sans-serif]">
+              <span className="w-1.25 h-1.25 rounded-full bg-[#c9a96e]" />
               Secure login
             </span>
-            <h2 className="text-[2.4rem] font-normal leading-[1.15] tracking-[-0.02em] text-[#1a1916] [font-family:'Instrument_Serif',serif] m-0 mb-1.5">
+            <h2 className="text-[2.4rem] font-normal leading-[1.15] tracking-[-0.02em] text-[#1a1916] font-['Instrument_Serif',serif] m-0 mb-1.5">
               Welcome back
             </h2>
-            <p className="text-[14px] font-light text-[#8a8278] m-0 leading-relaxed [font-family:'DM_Sans',sans-serif]">
+            <p className="text-[14px] font-light text-[#8a8278] m-0 leading-relaxed font-['DM_Sans',sans-serif]">
               Sign in to continue to your account.
             </p>
           </div>
@@ -153,36 +153,36 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {/* Email field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] [font-family:'DM_Sans',sans-serif]">
+              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] font-['DM_Sans',sans-serif]">
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#b0a898] pointer-events-none" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.75 h-3.75 text-[#b0a898] pointer-events-none" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full h-[50px] pl-10 pr-4 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 [font-family:'DM_Sans',sans-serif]"
+                  className="w-full h-12.5 pl-10 pr-4 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 font-['DM_Sans',sans-serif]"
                 />
               </div>
             </div>
 
             {/* Password field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] [font-family:'DM_Sans',sans-serif]">
+              <label className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6b6258] font-['DM_Sans',sans-serif]">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#b0a898] pointer-events-none" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.75 h-3.75 text-[#b0a898] pointer-events-none" />
                 <input
                   type={showPass ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full h-[50px] pl-10 pr-11 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 [font-family:'DM_Sans',sans-serif]"
+                  className="w-full h-12.5 pl-10 pr-11 bg-white border-[1.5px] border-[#e8e2d9] rounded-[10px] text-[14px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none transition-all duration-150 focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 font-['DM_Sans',sans-serif]"
                 />
                 <button
                   type="button"
@@ -191,16 +191,16 @@ export default function LoginPage() {
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0a898] hover:text-[#6b6258] transition-colors duration-150 p-1"
                 >
                   {showPass ? (
-                    <EyeOff className="w-[15px] h-[15px]" />
+                    <EyeOff className="w-3.75 h-3.75" />
                   ) : (
-                    <Eye className="w-[15px] h-[15px]" />
+                    <Eye className="w-3.75 h-3.75" />
                   )}
                 </button>
               </div>
               <div className="flex justify-end">
                 <Link
                   href="/forgot-password"
-                  className="text-[12px] text-[#c9a96e] hover:opacity-70 transition-opacity duration-150 [font-family:'DM_Sans',sans-serif]"
+                  className="text-[12px] text-[#c9a96e] hover:opacity-70 transition-opacity duration-150 font-['DM_Sans',sans-serif]"
                 >
                   Forgot password?
                 </Link>
@@ -211,9 +211,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="relative w-full h-[52px] mt-1 bg-[#1a1916] hover:bg-[#2d2b28] disabled:opacity-60 disabled:cursor-not-allowed rounded-[10px] flex items-center justify-center gap-2.5 text-[14px] font-medium tracking-[0.04em] text-[#f5f0e8] overflow-hidden transition-all duration-150 hover:-translate-y-px active:translate-y-0 [font-family:'DM_Sans',sans-serif]"
+              className="relative w-full h-13 mt-1 bg-[#1a1916] hover:bg-[#2d2b28] disabled:opacity-60 disabled:cursor-not-allowed rounded-[10px] flex items-center justify-center gap-2.5 text-[14px] font-medium tracking-[0.04em] text-[#f5f0e8] overflow-hidden transition-all duration-150 hover:-translate-y-px active:translate-y-0 font-['DM_Sans',sans-serif]"
             >
-              <span className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[#c9a96e]/15 pointer-events-none" />
+              <span className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-[#c9a96e]/15 pointer-events-none" />
               {loading ? (
                 <>
                   <span className="w-4 h-4 rounded-full border-2 border-[#f5f0e8]/30 border-t-[#f5f0e8] animate-spin" />
@@ -222,7 +222,7 @@ export default function LoginPage() {
               ) : (
                 <>
                   Sign In
-                  <ArrowRight className="w-[15px] h-[15px]" />
+                  <ArrowRight className="w-3.75 h-3.75" />
                 </>
               )}
             </button>
@@ -230,7 +230,7 @@ export default function LoginPage() {
 
           {/* Footer links */}
           <div className="mt-7 flex flex-col items-center gap-3">
-            <p className="text-[13px] text-[#8a8278] [font-family:'DM_Sans',sans-serif]">
+            <p className="text-[13px] text-[#8a8278] font-['DM_Sans',sans-serif]">
               Don&apos;t have an account?{" "}
               <Link
                 href="/register"
@@ -242,7 +242,7 @@ export default function LoginPage() {
 
             <div className="flex items-center gap-3 w-full">
               <div className="flex-1 h-px bg-[#e8e2d9]" />
-              <span className="text-[11px] text-[#c4bcb2] tracking-[0.06em] uppercase [font-family:'DM_Sans',sans-serif]">
+              <span className="text-[11px] text-[#c4bcb2] tracking-[0.06em] uppercase font-['DM_Sans',sans-serif]">
                 or
               </span>
               <div className="flex-1 h-px bg-[#e8e2d9]" />
@@ -250,7 +250,7 @@ export default function LoginPage() {
 
             <Link
               href="/products"
-              className="flex items-center gap-1 text-[12px] text-[#b0a898] hover:text-[#6b6258] transition-colors duration-150 [font-family:'DM_Sans',sans-serif]"
+              className="flex items-center gap-1 text-[12px] text-[#b0a898] hover:text-[#6b6258] transition-colors duration-150 font-['DM_Sans',sans-serif]"
             >
               Continue as guest
               <ArrowRight className="w-3 h-3" />

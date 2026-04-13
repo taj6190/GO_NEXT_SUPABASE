@@ -67,110 +67,108 @@ export default function ProductCard({ product, index = 0 }: Props) {
       transition={{
         delay: index * 0.06,
         duration: 0.45,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.22, 1, 0.36, 1] as const, // Added 'as const' to fix strict TS build errors
       }}
       className="h-full"
     >
       <div className="group relative flex flex-col h-full bg-white border border-[#ede9e2] hover:border-[#c9a96e]/40 hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden">
         {/* ── Badges ── */}
         {discount > 0 && (
-          <div className="absolute top-2.5 left-2.5 z-10 bg-[#1a1916] text-[#c9a96e] text-[9px] px-2 py-1 font-semibold tracking-[0.12em] uppercase [font-family:'DM_Sans',sans-serif]">
+          <div className="absolute top-2.5 left-2.5 z-10 bg-[#1a1916] text-[#c9a96e] text-[9px] px-2 py-1 font-semibold tracking-[0.12em] uppercase font-['DM_Sans',sans-serif]">
             -{discount}%
           </div>
         )}
         {!discount && product.is_featured && (
-          <div className="absolute top-2.5 left-2.5 z-10 bg-[#c9a96e] text-[#1a1916] text-[9px] px-2 py-1 font-semibold tracking-[0.12em] uppercase [font-family:'DM_Sans',sans-serif]">
+          <div className="absolute top-2.5 left-2.5 z-10 bg-[#c9a96e] text-[#1a1916] text-[9px] px-2 py-1 font-semibold tracking-[0.12em] uppercase font-['DM_Sans',sans-serif]">
             TOP
           </div>
         )}
 
-        {/* ── Image ── */}
-        <Link
-          href={`/products/${product.slug}`}
-          className="relative w-full aspect-[4/3] bg-[#faf8f5] overflow-hidden block shrink-0"
-        >
-          <Image
-            src={getProductImage(product)}
-            alt={product.name}
-            fill
-            className="object-contain p-3 group-hover:scale-[1.04] transition-transform duration-700 ease-out"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
-
-          {/* Hover action overlay */}
-          <div className="absolute inset-0 bg-[#1a1916]/0 group-hover:bg-[#1a1916]/[0.03] transition-colors duration-500" />
+        {/* ── Image Wrapper ── */}
+        <div className="relative w-full aspect-4/3 bg-[#faf8f5] overflow-hidden shrink-0">
+          <Link
+            href={`/products/${product.slug}`}
+            className="block w-full h-full"
+          >
+            <Image
+              src={getProductImage(product)}
+              alt={product.name}
+              fill
+              className="object-contain p-3 group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+            {/* Hover action overlay */}
+            <div className="absolute inset-0 bg-[#1a1916]/0 group-hover:bg-[#1a1916]/3 transition-colors duration-500" />
+          </Link>
 
           {!isInStock && (
-            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
-              <span className="bg-[#1a1916] text-[#faf8f5] text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.14em] [font-family:'DM_Sans',sans-serif]">
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10 pointer-events-none">
+              <span className="bg-[#1a1916] text-[#faf8f5] text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.14em] font-['DM_Sans',sans-serif]">
                 Sold Out
               </span>
             </div>
           )}
 
-          {/* Quick action buttons — slide up on hover */}
+          {/* ── Desktop Hover Actions ── (Hidden on mobile) */}
           {isInStock && (
-            <div className="absolute bottom-0 inset-x-0 flex gap-px translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-10">
+            <div className="hidden md:flex absolute bottom-0 inset-x-0 gap-px translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20 pointer-events-auto">
               <button
                 onClick={handleBuyNow}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] text-[10px] font-semibold tracking-[0.08em] uppercase py-2.5 transition-colors duration-150 [font-family:'DM_Sans',sans-serif]"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] text-[10px] font-semibold tracking-[0.08em] uppercase py-3 transition-colors duration-150 font-['DM_Sans',sans-serif]"
               >
-                <Zap size={10} strokeWidth={2.5} />
-                Buy Now
+                <Zap size={11} strokeWidth={2.5} /> Buy Now
               </button>
               <button
                 onClick={handleAddToCart}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-[#1a1916] hover:bg-[#2d2b28] text-[#faf8f5] text-[10px] font-semibold tracking-[0.08em] uppercase py-2.5 transition-colors duration-150 [font-family:'DM_Sans',sans-serif]"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-[#1a1916] hover:bg-[#2d2b28] text-[#faf8f5] text-[10px] font-semibold tracking-[0.08em] uppercase py-3 transition-colors duration-150 font-['DM_Sans',sans-serif]"
               >
-                <ShoppingBag size={10} strokeWidth={2.5} />
-                Add Cart
+                <ShoppingBag size={11} strokeWidth={2.5} /> Add Cart
               </button>
             </div>
           )}
-        </Link>
+        </div>
 
         {/* ── Content ── */}
         <div className="p-3 flex flex-col flex-1 border-t border-[#ede9e2]">
           {/* Category */}
-          <p className="text-[9.5px] font-semibold tracking-[0.14em] text-[#c9a96e] uppercase mb-1 [font-family:'DM_Sans',sans-serif]">
+          <p className="text-[9.5px] font-semibold tracking-[0.14em] text-[#c9a96e] uppercase mb-1 font-['DM_Sans',sans-serif]">
             {product.category_name || "Product"}
           </p>
 
           {/* Name */}
           <Link href={`/products/${product.slug}`}>
-            <h3 className="text-[#1a1916] text-[13px] font-medium leading-snug mb-1.5 hover:text-[#c9a96e] transition-colors duration-200 line-clamp-2 [font-family:'DM_Sans',sans-serif]">
+            <h3 className="text-[#1a1916] text-[13px] font-medium leading-snug mb-1.5 hover:text-[#c9a96e] transition-colors duration-200 line-clamp-2 font-['DM_Sans',sans-serif]">
               {product.name}
             </h3>
           </Link>
 
           {/* Description */}
-          <p className="text-[10.5px] text-[#9a9086] leading-relaxed line-clamp-1 mb-2.5 [font-family:'DM_Sans',sans-serif]">
+          <p className="text-[10.5px] text-[#9a9086] leading-relaxed line-clamp-1 mb-2.5 font-['DM_Sans',sans-serif]">
             {product.description
               ? stripHtml(product.description)
               : "Premium quality, built to last."}
           </p>
 
-          {/* Spacer */}
-          <div className="mt-auto">
-            {/* Price row */}
-            <div className="flex items-end justify-between mb-2">
+          {/* Spacer to push pricing to bottom */}
+          <div className="mt-auto flex flex-col gap-2">
+            {/* Price & Rating Row */}
+            <div className="flex items-end justify-between">
               <div className="flex flex-col gap-0.5">
                 {ep.original && !hasVariants(product) && (
-                  <span className="text-[10px] text-[#b0a898] line-through [font-family:'DM_Sans',sans-serif]">
+                  <span className="text-[10px] text-[#b0a898] line-through font-['DM_Sans',sans-serif]">
                     {formatPrice(ep.original)}
                   </span>
                 )}
-                <span className="text-[16px] font-semibold text-[#1a1916] leading-none [font-family:'DM_Sans',sans-serif]">
+                <span className="text-[16px] font-semibold text-[#1a1916] leading-none font-['DM_Sans',sans-serif]">
                   {hasVariants(product)
                     ? getDisplayPrice(product)
                     : formatPrice(ep.current)}
                 </span>
               </div>
 
-              {/* Rating */}
               <div className="flex items-center gap-1">
                 <Star size={9} className="fill-[#c9a96e] text-[#c9a96e]" />
-                <span className="text-[10px] text-[#9a9086] font-medium [font-family:'DM_Sans',sans-serif]">
+                <span className="text-[10px] text-[#9a9086] font-medium font-['DM_Sans',sans-serif]">
                   {product.average_rating
                     ? Number(product.average_rating).toFixed(1)
                     : "—"}{" "}
@@ -187,11 +185,29 @@ export default function ProductCard({ product, index = 0 }: Props) {
                 className={`w-1.5 h-1.5 rounded-full ${isInStock ? "bg-[#4ade80]" : "bg-[#f87171]"}`}
               />
               <span
-                className={`text-[9.5px] font-semibold uppercase tracking-[0.1em] [font-family:'DM_Sans',sans-serif] ${isInStock ? "text-[#4ade80]" : "text-[#f87171]"}`}
+                className={`text-[9.5px] font-semibold uppercase tracking-widest font-['DM_Sans',sans-serif] ${isInStock ? "text-[#4ade80]" : "text-[#f87171]"}`}
               >
                 {isInStock ? "In Stock" : "Out of Stock"}
               </span>
             </div>
+
+            {/* ── Mobile Static Actions ── (Hidden on Desktop) */}
+            {isInStock && (
+              <div className="flex md:hidden gap-1.5 pt-1">
+                <button
+                  onClick={handleBuyNow}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#c9a96e] active:bg-[#b8944f] text-[#1a1916] text-[10px] font-semibold tracking-[0.08em] uppercase py-3 transition-colors duration-150 font-['DM_Sans',sans-serif]"
+                >
+                  <Zap size={11} strokeWidth={2.5} /> Buy
+                </button>
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#1a1916] active:bg-[#2d2b28] text-[#faf8f5] text-[10px] font-semibold tracking-[0.08em] uppercase py-3 transition-colors duration-150 font-['DM_Sans',sans-serif]"
+                >
+                  <ShoppingBag size={11} strokeWidth={2.5} /> Cart
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
