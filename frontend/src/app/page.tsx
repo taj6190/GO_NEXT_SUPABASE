@@ -24,10 +24,14 @@ const TRUST_ITEMS = [
   { icon: Zap, label: "Flash Deals", sub: "Up to 50% off" },
 ];
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
+const fadeUp = (delay: number) => ({
+  initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { delay, duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  transition: {
+    delay,
+    duration: 0.8,
+    ease: [0.4, 0, 0.2, 1] as const, // ✅ Locks it as exactly 4 numbers
+  },
 });
 
 export default function HomePage() {
