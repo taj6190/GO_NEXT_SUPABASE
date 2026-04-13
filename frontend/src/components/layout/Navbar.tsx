@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import api from "@/lib/api";
@@ -16,7 +16,7 @@ import {
   Menu,
   Package,
   Search,
-  ShoppingCart,
+  ShoppingBag,
   Sparkles,
   User,
   X,
@@ -80,8 +80,8 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
   }, [search]);
 
   useEffect(() => {
@@ -90,26 +90,21 @@ export default function Navbar() {
       setShowSearchDropdown(false);
       return;
     }
-
-    const fetchResults = async () => {
+    const run = async () => {
       setIsSearching(true);
       setShowSearchDropdown(true);
       try {
         const { data } = await api.get(
           `/products?search=${encodeURIComponent(debouncedSearch)}&limit=5`,
         );
-        if (data.success) {
-          setSearchResults(data.data || []);
-        }
-      } catch (error) {
-        console.error("Search failed", error);
+        if (data.success) setSearchResults(data.data || []);
+      } catch {
         setSearchResults([]);
       } finally {
         setIsSearching(false);
       }
     };
-
-    fetchResults();
+    run();
   }, [debouncedSearch]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -124,235 +119,187 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Premium Announcement Bar - Bold Design */}
-      <motion.div
-        initial={{ y: -40 }}
-        animate={{ y: 0 }}
-        className="relative bg-linear-to-r from-zinc-900 via-neutral-800 to-zinc-900 text-white overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px)] bg-size-[24px] opacity-30" />
-        <div className="site-container relative z-10 flex items-center justify-center sm:justify-between py-2.5">
+      {/* ── ANNOUNCEMENT BAR ── */}
+      <div className="bg-[#1a1916] border-b border-[#2a2824] font-['DM_Sans',sans-serif]">
+        <div className="site-container flex items-center justify-center sm:justify-between py-2.5">
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <Zap
-                className="w-3.5 h-3.5 text-amber-400 animate-pulse"
-                fill="currentColor"
-              />
-              <div className="absolute inset-0 blur-sm">
-                <Zap
-                  className="w-3.5 h-3.5 text-amber-400"
-                  fill="currentColor"
-                />
-              </div>
-            </div>
-            <span className="text-[11px] font-bold tracking-[0.08em] uppercase">
+            <Zap
+              className="w-3 h-3 text-[#c9a96e] shrink-0"
+              fill="currentColor"
+            />
+            <span className="text-[11px] font-medium tracking-[0.06em] text-[#a09a8e]">
               Free shipping on orders above{" "}
-              <span className="text-amber-400 font-black">৳2,000</span>
+              <span className="text-[#c9a96e] font-semibold">৳2,000</span>
             </span>
           </div>
           <Link
             href="/track"
-            className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold tracking-[0.12em] uppercase text-zinc-400 hover:text-white transition-all group"
+            className="hidden sm:flex items-center gap-1.5 text-[10px] font-medium tracking-widest uppercase text-[#6b6560] hover:text-[#c9a96e] transition-colors group"
           >
-            <MapPin className="w-3 h-3 group-hover:animate-bounce" />
+            <MapPin className="w-3 h-3" />
             Track Order
-            <ArrowRight className="w-3 h-3 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+            <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Main Navbar - Redesigned with Bold Typography */}
-      <header className="sticky top-0 z-40 w-full bg-white shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
-        {/* Primary Navigation Row */}
+      {/* ── MAIN HEADER ── */}
+      <header className="sticky top-0 z-40 w-full bg-[#faf8f5] border-b border-[#ede9e2] font-['DM_Sans',sans-serif]">
+        {/* Primary row */}
         <div className="site-container">
-          <div className="flex items-center justify-between h-18 gap-6">
-            {/* Mobile Menu + Logo */}
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between h-17 gap-6">
+            {/* Mobile menu trigger + Logo */}
+            <div className="flex items-center gap-3">
               <button
                 onClick={toggleMobileMenu}
-                className="md:hidden -ml-2 p-2.5 hover:bg-neutral-50 active:scale-95 transition-all group"
+                className="md:hidden p-2 text-[#6b6258] hover:text-[#1a1916] hover:bg-[#f0ebe3] transition-colors"
               >
-                <Menu
-                  className="w-5 h-5 text-neutral-700 group-hover:text-black transition-colors"
-                  strokeWidth={2.5}
-                />
+                <Menu className="w-5 h-5" />
               </button>
 
-              <Link href="/" className="flex items-center gap-3 group">
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6, ease: "backOut" }}
-                  className="relative w-10 h-10 bg-black group-hover:bg-linear-to-br group-hover:from-[#ef4a23] group-hover:to-[#d63516] transition-all shadow-lg"
-                >
-                  <div className="absolute inset-0 bg-linear-to-br from-white/20 to-transparent" />
-                  <span className="absolute inset-0 flex items-center justify-center text-white font-black text-xl">
-                    G
+              <Link href="/" className="flex items-center gap-3 group shrink-0">
+                <div className="w-9 h-9 bg-[#1a1916] flex items-center justify-center shrink-0 group-hover:bg-[#c9a96e] transition-colors duration-300">
+                  <span className="text-[#c9a96e] group-hover:text-[#1a1916] font-semibold text-[15px] transition-colors font-['Instrument_Serif',serif]">
+                    S
                   </span>
-                </motion.div>
+                </div>
                 <div className="hidden sm:block">
-                  <span className="block text-2xl font-black tracking-tight text-black leading-none">
-                    GoNext
+                  <span className="block text-[20px] font-normal leading-none text-[#1a1916] font-['Instrument_Serif',serif]">
+                    ShopVerse
                   </span>
-                  <span className="block text-[9px] font-bold tracking-[0.15em] uppercase text-neutral-400 -mt-0.5">
-                    Commerce
+                  <span className="block text-[9px] font-medium tracking-[0.18em] uppercase text-[#c9a96e] mt-0.5">
+                    Bangladesh
                   </span>
                 </div>
               </Link>
             </div>
 
-            {/* Enhanced Search Bar */}
-            <div className="flex-1 max-w-2xl hidden md:block" ref={searchRef}>
+            {/* Search */}
+            <div className="flex-1 max-w-xl hidden md:block" ref={searchRef}>
               <form onSubmit={handleSearchSubmit} className="relative group">
-                <div className="relative">
-                  <Search
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 group-focus-within:text-[#ef4a23] transition-colors z-10"
-                    strokeWidth={2.5}
-                  />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      if (e.target.value.trim().length > 1)
-                        setShowSearchDropdown(true);
-                    }}
-                    onFocus={() => {
-                      if (search.trim().length > 1) setShowSearchDropdown(true);
-                    }}
-                    placeholder="Search products, brands, categories..."
-                    className="w-full h-12 bg-neutral-50 border-2 border-transparent pl-11 pr-12 text-sm font-semibold text-black outline-none focus:bg-white focus:border-[#ef4a23] transition-all placeholder:text-neutral-400 placeholder:font-medium"
-                    autoComplete="off"
-                  />
-                  {isSearching && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <Loader2
-                        className="w-4 h-4 text-neutral-400 animate-spin"
-                        strokeWidth={2.5}
-                      />
-                    </div>
-                  )}
-                </div>
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.75 h-3.75 text-[#b0a898] group-focus-within:text-[#c9a96e] transition-colors pointer-events-none" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    if (e.target.value.trim().length > 1)
+                      setShowSearchDropdown(true);
+                  }}
+                  onFocus={() => {
+                    if (search.trim().length > 1) setShowSearchDropdown(true);
+                  }}
+                  placeholder="Search products, brands, categories…"
+                  autoComplete="off"
+                  className="w-full h-11 bg-white border border-[#e8e2d9] pl-10 pr-10 text-[13px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e]/10 transition-all font-['DM_Sans',sans-serif]"
+                />
+                {isSearching && (
+                  <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.75 h-3.75 text-[#b0a898] animate-spin" />
+                )}
 
-                {/* Enhanced AJAX Dropdown */}
+                {/* Search dropdown */}
                 <AnimatePresence>
                   {showSearchDropdown && search.trim().length > 1 && (
                     <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                      className="absolute left-0 right-0 top-[calc(100%+8px)] bg-white border-2 border-neutral-100 shadow-[0_20px_60px_rgba(0,0,0,0.12)] overflow-hidden z-50 max-h-120"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute left-0 right-0 top-[calc(100%+6px)] bg-white border border-[#ede9e2] shadow-[0_16px_48px_rgba(0,0,0,0.1)] overflow-hidden z-50"
                     >
-                      <div className="overflow-y-auto">
-                        {isSearching && searchResults.length === 0 ? (
-                          <div className="px-6 py-12 text-center">
-                            <Loader2 className="w-6 h-6 text-neutral-400 animate-spin mx-auto mb-3" />
-                            <p className="text-sm font-semibold text-neutral-500">
-                              Searching...
-                            </p>
-                          </div>
-                        ) : searchResults.length > 0 ? (
-                          <>
-                            {searchResults.map((product, idx) => (
-                              <Link
-                                key={product.id}
-                                href={`/products/${product.slug}`}
-                                onClick={() => {
-                                  setShowSearchDropdown(false);
-                                  setSearch("");
-                                }}
-                                className="flex items-center gap-4 px-4 py-3.5 hover:bg-neutral-50 transition-all group border-b border-neutral-100 last:border-0"
-                              >
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ delay: idx * 0.05 }}
-                                  className="relative"
-                                >
-                                  <Image
-                                    src={getProductImage(product)}
-                                    alt={product.name}
-                                    width={56}
-                                    height={56}
-                                    className="w-14 h-14 object-cover bg-white border-2 border-neutral-100 group-hover:border-[#ef4a23] transition-all"
-                                  />
-                                </motion.div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm font-bold text-black group-hover:text-[#ef4a23] transition-colors line-clamp-1">
-                                    {product.name}
-                                  </h4>
-                                  <p className="text-xs font-black text-neutral-600 mt-1">
-                                    ৳
-                                    {Number(product.price).toLocaleString(
-                                      "en-IN",
-                                    )}
-                                  </p>
-                                </div>
-                                <ArrowRight className="w-4 h-4 text-neutral-300 group-hover:text-[#ef4a23] group-hover:translate-x-1 transition-all" />
-                              </Link>
-                            ))}
-                            <button
-                              type="submit"
-                              className="w-full py-4 text-xs font-black text-[#ef4a23] hover:text-white hover:bg-[#ef4a23] uppercase tracking-[0.12em] transition-all border-t-2 border-neutral-100 flex items-center justify-center gap-2 group"
+                      {isSearching && searchResults.length === 0 ? (
+                        <div className="px-5 py-8 text-center">
+                          <Loader2 className="w-5 h-5 text-[#b0a898] animate-spin mx-auto mb-2" />
+                          <p className="text-[12px] text-[#9a9086]">
+                            Searching…
+                          </p>
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        <>
+                          {searchResults.map((product, idx) => (
+                            <Link
+                              key={product.id}
+                              href={`/products/${product.slug}`}
+                              onClick={() => {
+                                setShowSearchDropdown(false);
+                                setSearch("");
+                              }}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-[#faf8f5] transition-colors group border-b border-[#f0ebe3] last:border-0"
                             >
-                              View all results
-                              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                          </>
-                        ) : (
-                          <div className="px-6 py-12 text-center">
-                            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <Search className="w-7 h-7 text-neutral-400" />
-                            </div>
-                            <p className="text-sm font-bold text-neutral-600">
-                              No products found for &quot;{search}&quot;
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                              <div className="relative w-11 h-11 bg-[#faf8f5] border border-[#ede9e2] shrink-0">
+                                <Image
+                                  src={getProductImage(product)}
+                                  alt={product.name}
+                                  fill
+                                  className="object-contain p-1"
+                                  sizes="44px"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[13px] font-medium text-[#1a1916] group-hover:text-[#c9a96e] transition-colors line-clamp-1">
+                                  {product.name}
+                                </p>
+                                <p className="text-[11px] text-[#9a9086] mt-0.5">
+                                  ৳
+                                  {Number(product.price).toLocaleString(
+                                    "en-IN",
+                                  )}
+                                </p>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-[#c4bcb2] group-hover:text-[#c9a96e] transition-colors shrink-0" />
+                            </Link>
+                          ))}
+                          <button
+                            type="submit"
+                            className="w-full py-3 text-[11px] font-semibold text-[#c9a96e] hover:bg-[#faf8f5] uppercase tracking-widest transition-colors border-t border-[#ede9e2] flex items-center justify-center gap-1.5"
+                          >
+                            View all results <ArrowRight className="w-3 h-3" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="px-5 py-8 text-center">
+                          <p className="text-[13px] text-[#9a9086]">
+                            No results for &ldquo;{search}&rdquo;
+                          </p>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </form>
             </div>
 
-            {/* Action Icons - Redesigned */}
-            <div className="flex items-center gap-1.5">
+            {/* Actions */}
+            <div className="flex items-center gap-0.5">
+              {/* Mobile search */}
               <button
                 onClick={() => router.push("/products")}
-                className="md:hidden p-2.5 hover:bg-neutral-50 active:scale-95 transition-all"
+                className="md:hidden p-2.5 text-[#6b6258] hover:text-[#1a1916] hover:bg-[#f0ebe3] transition-colors"
               >
-                <Search
-                  className="w-5 h-5 text-neutral-700"
-                  strokeWidth={2.5}
-                />
+                <Search className="w-5 h-5" />
               </button>
 
+              {/* Wishlist */}
               <Link
                 href="/wishlist"
-                className="hidden sm:flex p-2.5 hover:bg-neutral-50 active:scale-95 transition-all group relative"
+                className="hidden sm:flex p-2.5 text-[#6b6258] hover:text-[#1a1916] hover:bg-[#f0ebe3] transition-colors"
               >
-                <Heart
-                  className="w-5 h-5 text-neutral-700 group-hover:text-[#ef4a23] group-hover:fill-[#ef4a23] transition-all"
-                  strokeWidth={2.5}
-                />
+                <Heart className="w-5 h-5" />
               </Link>
 
+              {/* Cart */}
               <button
                 onClick={toggleCart}
-                className="relative p-2.5 hover:bg-neutral-50 active:scale-95 transition-all group"
+                className="relative p-2.5 text-[#6b6258] hover:text-[#1a1916] hover:bg-[#f0ebe3] transition-colors"
               >
-                <ShoppingCart
-                  className="w-5 h-5 text-neutral-700 group-hover:text-[#ef4a23] transition-colors"
-                  strokeWidth={2.5}
-                />
+                <ShoppingBag className="w-5 h-5" />
                 <AnimatePresence>
                   {itemCount > 0 && (
                     <motion.span
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      exit={{ scale: 0, rotate: 180 }}
-                      className="absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1 bg-linear-to-br from-[#ef4a23] to-[#d63516] text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-lg"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 bg-[#c9a96e] text-[#1a1916] text-[9px] font-bold flex items-center justify-center"
                     >
                       {itemCount > 99 ? "99+" : itemCount}
                     </motion.span>
@@ -360,74 +307,77 @@ export default function Navbar() {
                 </AnimatePresence>
               </button>
 
+              {/* User */}
               {isAuthenticated ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className={`p-2.5 transition-all active:scale-95 ${
-                      showUserMenu
-                        ? "bg-black text-white"
-                        : "hover:bg-neutral-50 text-neutral-700"
-                    }`}
+                    className={`p-2.5 transition-colors ${showUserMenu ? "bg-[#1a1916] text-[#c9a96e]" : "text-[#6b6258] hover:text-[#1a1916] hover:bg-[#f0ebe3]"}`}
                   >
-                    <User className="w-5 h-5" strokeWidth={2.5} />
+                    <User className="w-5 h-5" />
                   </button>
                   <AnimatePresence>
                     {showUserMenu && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-[calc(100%+8px)] w-72 bg-white border-2 border-neutral-100 shadow-[0_20px_60px_rgba(0,0,0,0.15)] z-50 overflow-hidden"
+                        className="absolute right-0 top-[calc(100%+6px)] w-64 bg-white border border-[#ede9e2] shadow-[0_16px_48px_rgba(0,0,0,0.1)] z-50 overflow-hidden"
                       >
-                        <div className="bg-linear-to-br from-neutral-900 to-black px-5 py-4 text-white">
-                          <p className="font-black text-base truncate">
-                            {user?.full_name || "User Account"}
+                        {/* User header */}
+                        <div className="bg-[#1a1916] px-4 py-3.5">
+                          <p className="text-[14px] font-normal text-[#f5f0e8] truncate font-['Instrument_Serif',serif]">
+                            {user?.full_name || "My Account"}
                           </p>
-                          <p className="text-xs text-neutral-400 truncate mt-1 font-medium">
+                          <p className="text-[11px] text-[#6b6560] truncate mt-0.5">
                             {user?.email}
                           </p>
                         </div>
-                        <div className="p-2">
-                          <Link
-                            href="/orders"
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-50 transition-all group"
-                          >
-                            <Package className="w-4 h-4" strokeWidth={2.5} />
-                            My Orders
-                            <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                          </Link>
-                          <Link
-                            href="/wishlist"
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-50 transition-all group"
-                          >
-                            <Heart className="w-4 h-4" strokeWidth={2.5} />
-                            Wishlist
-                            <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                          </Link>
+                        <div className="p-1.5">
+                          {[
+                            {
+                              href: "/orders",
+                              icon: Package,
+                              label: "My Orders",
+                            },
+                            {
+                              href: "/wishlist",
+                              icon: Heart,
+                              label: "Wishlist",
+                            },
+                          ].map(({ href, icon: Icon, label }) => (
+                            <Link
+                              key={href}
+                              href={href}
+                              className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-[#6b6258] hover:text-[#1a1916] hover:bg-[#faf8f5] transition-colors group"
+                            >
+                              <Icon className="w-4 h-4 shrink-0" />
+                              {label}
+                              <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-[#c9a96e]" />
+                            </Link>
+                          ))}
                           {user?.role === "admin" && (
                             <Link
                               href="/admin"
-                              className="flex items-center gap-3 px-3 py-2.5 text-sm font-black text-[#ef4a23] hover:bg-red-50 transition-all group"
+                              className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-[#c9a96e] hover:bg-[#faf8f5] transition-colors group"
                             >
-                              <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+                              <Sparkles className="w-4 h-4" />
                               Admin Panel
-                              <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                              <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                             </Link>
                           )}
                         </div>
-                        <div className="border-t-2 border-neutral-100 p-2">
+                        <div className="border-t border-[#ede9e2] p-1.5">
                           <button
                             onClick={() => {
                               logout();
                               setShowUserMenu(false);
                             }}
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-black text-red-600 hover:bg-red-50 transition-all w-full group"
+                            className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-[#b87878] hover:text-[#991b1b] hover:bg-[#fef2f2] transition-colors w-full"
                           >
-                            <LogOut className="w-4 h-4" strokeWidth={2.5} />
+                            <LogOut className="w-4 h-4" />
                             Sign Out
-                            <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                           </button>
                         </div>
                       </motion.div>
@@ -437,7 +387,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="ml-2 bg-black hover:bg-linear-to-r hover:from-[#ef4a23] hover:to-[#d63516] text-white px-5 py-2.5 text-xs font-black tracking-[0.08em] uppercase transition-all active:scale-95 shadow-lg hover:shadow-xl"
+                  className="ml-2 bg-[#1a1916] hover:bg-[#c9a96e] text-[#f5f0e8] hover:text-[#1a1916] px-5 py-2.5 text-[11px] font-semibold tracking-widest uppercase transition-all duration-200 font-['DM_Sans',sans-serif]"
                 >
                   Sign In
                 </Link>
@@ -446,134 +396,104 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Secondary Navigation Bar - Categories & Links */}
+        {/* Secondary nav — categories + links */}
         {!isAdmin && (
-          <div className="border-t-2 border-neutral-100">
+          <div className="border-t border-[#ede9e2] bg-white">
             <div className="site-container">
-              <div className="flex items-center justify-between h-14">
+              <div className="flex items-center justify-between h-11">
                 <div className="flex items-center gap-8">
-                  {/* Category Mega Menu */}
+                  {/* Category dropdown */}
                   <div className="relative" ref={catRef}>
                     <button
                       onClick={() => setShowCategories(!showCategories)}
-                      className={`flex items-center gap-2.5 h-14 px-1 text-xs font-black uppercase tracking-widest transition-all border-b-3 ${
+                      className={`flex items-center gap-2 h-11 text-[11px] font-semibold tracking-widest uppercase transition-colors border-b-2 ${
                         showCategories
-                          ? "text-[#ef4a23] border-[#ef4a23]"
-                          : "text-neutral-600 hover:text-black border-transparent"
+                          ? "text-[#c9a96e] border-[#c9a96e]"
+                          : "text-[#6b6258] hover:text-[#1a1916] border-transparent"
                       }`}
                     >
-                      <Menu className="w-4 h-4" strokeWidth={2.5} />
+                      <Menu className="w-3.5 h-3.5" />
                       Categories
                       <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                          showCategories ? "rotate-180" : ""
-                        }`}
-                        strokeWidth={2.5}
+                        className={`w-3 h-3 transition-transform duration-200 ${showCategories ? "rotate-180" : ""}`}
                       />
                     </button>
 
                     <AnimatePresence>
                       {showCategories && (
                         <motion.div
-                          initial={{ opacity: 0, y: 8 }}
+                          initial={{ opacity: 0, y: 6 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 8 }}
+                          exit={{ opacity: 0, y: 6 }}
                           transition={{ duration: 0.15 }}
-                          className="absolute left-0 top-full w-80 bg-white border-2 border-neutral-100 shadow-[0_20px_60px_rgba(0,0,0,0.12)] z-50 max-h-125 overflow-y-auto"
+                          className="absolute left-0 top-full w-72 bg-white border border-[#ede9e2] shadow-[0_16px_48px_rgba(0,0,0,0.1)] z-50 max-h-120 overflow-y-auto"
                         >
+                          {/* Gold top accent */}
+                          <div className="h-0.5 bg-[#c9a96e]" />
                           {categories.map((cat, idx) => (
                             <div key={cat.id}>
-                              {/* Main Category */}
-                              <div className="flex items-center gap-0 border-b border-neutral-100 last:border-0">
+                              <div className="flex items-center border-b border-[#f0ebe3] last:border-0">
                                 <Link
                                   href={`/products?category_id=${cat.id}`}
                                   onClick={() => setShowCategories(false)}
-                                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-neutral-50 transition-all group flex-1"
+                                  className="flex items-center gap-3 px-4 py-3 hover:bg-[#faf8f5] transition-colors group flex-1"
                                 >
-                                  <motion.div
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: idx * 0.03 }}
-                                  >
-                                    {cat.image_url ? (
-                                      <Image
-                                        src={cat.image_url}
-                                        alt=""
-                                        width={32}
-                                        height={32}
-                                        className="w-8 h-8 object-contain grayscale group-hover:grayscale-0 transition-all"
-                                      />
-                                    ) : (
-                                      <div className="w-8 h-8 bg-neutral-100 flex items-center justify-center text-sm">
-                                        📦
-                                      </div>
-                                    )}
-                                  </motion.div>
-                                  <span className="font-bold text-sm text-neutral-700 group-hover:text-black flex-1">
+                                  {cat.image_url ? (
+                                    <Image
+                                      src={cat.image_url}
+                                      alt=""
+                                      width={28}
+                                      height={28}
+                                      className="w-7 h-7 object-contain opacity-70 group-hover:opacity-100 transition-opacity shrink-0"
+                                    />
+                                  ) : (
+                                    <div className="w-7 h-7 bg-[#f0ebe3] flex items-center justify-center text-sm shrink-0">
+                                      📦
+                                    </div>
+                                  )}
+                                  <span className="text-[13px] font-medium text-[#6b6258] group-hover:text-[#1a1916] transition-colors flex-1">
                                     {cat.name}
                                   </span>
-                                  <ArrowRight className="w-4 h-4 text-neutral-300 group-hover:text-[#ef4a23] group-hover:translate-x-1 transition-all" />
+                                  <ArrowRight className="w-3.5 h-3.5 text-[#c4bcb2] group-hover:text-[#c9a96e] transition-colors" />
                                 </Link>
-
-                                {/* Expand/Collapse button for subcategories */}
                                 {cat.children && cat.children.length > 0 && (
                                   <button
-                                    onClick={(e) => {
-                                      e.preventDefault();
+                                    onClick={() =>
                                       setExpandedCategory(
                                         expandedCategory === cat.id
                                           ? null
                                           : cat.id,
-                                      );
-                                    }}
-                                    className="px-3 py-3.5 hover:bg-neutral-50 transition-all border-l border-neutral-100"
+                                      )
+                                    }
+                                    className="px-3 py-3 border-l border-[#f0ebe3] text-[#9a9086] hover:text-[#c9a96e] hover:bg-[#faf8f5] transition-colors"
                                   >
                                     <ChevronDown
-                                      className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${
-                                        expandedCategory === cat.id
-                                          ? "rotate-180"
-                                          : ""
-                                      }`}
-                                      strokeWidth={2.5}
+                                      className={`w-3.5 h-3.5 transition-transform duration-200 ${expandedCategory === cat.id ? "rotate-180" : ""}`}
                                     />
                                   </button>
                                 )}
                               </div>
-
-                              {/* Subcategories Dropdown */}
                               <AnimatePresence>
                                 {expandedCategory === cat.id &&
-                                  cat.children &&
-                                  cat.children.length > 0 && (
+                                  cat.children?.length && (
                                     <motion.div
-                                      initial={{ opacity: 0, height: 0 }}
-                                      animate={{ opacity: 1, height: "auto" }}
-                                      exit={{ opacity: 0, height: 0 }}
-                                      transition={{ duration: 0.2 }}
-                                      className="bg-neutral-50 overflow-hidden"
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.18 }}
+                                      className="overflow-hidden bg-[#faf8f5]"
                                     >
-                                      {cat.children.map((subcat) => (
+                                      {cat.children.map((sub) => (
                                         <Link
-                                          key={subcat.id}
-                                          href={`/products?category_id=${subcat.id}`}
+                                          key={sub.id}
+                                          href={`/products?category_id=${sub.id}`}
                                           onClick={() =>
                                             setShowCategories(false)
                                           }
-                                          className="flex items-center gap-3 px-9 py-2.5 text-sm font-semibold text-neutral-600 hover:text-[#ef4a23] hover:bg-white transition-all group border-b border-neutral-100 last:border-0"
+                                          className="flex items-center gap-2.5 pl-11 pr-4 py-2.5 text-[12px] font-medium text-[#9a9086] hover:text-[#c9a96e] hover:bg-white transition-colors border-b border-[#ede9e2] last:border-0"
                                         >
-                                          <motion.div
-                                            initial={{
-                                              opacity: 0,
-                                              x: -5,
-                                            }}
-                                            animate={{
-                                              opacity: 1,
-                                              x: 0,
-                                            }}
-                                            transition={{ duration: 0.15 }}
-                                            className="w-1 h-1 bg-[#ef4a23] rounded-full group-hover:scale-150 transition-transform"
-                                          />
-                                          {subcat.name}
+                                          <span className="w-1 h-1 rounded-full bg-[#c9a96e] shrink-0 opacity-60" />
+                                          {sub.name}
                                         </Link>
                                       ))}
                                     </motion.div>
@@ -586,8 +506,8 @@ export default function Navbar() {
                     </AnimatePresence>
                   </div>
 
-                  {/* Main Navigation Links */}
-                  <nav className="hidden md:flex items-center gap-8">
+                  {/* Nav links */}
+                  <nav className="hidden md:flex items-center gap-7">
                     {[
                       { href: "/products", label: "All Products" },
                       {
@@ -599,10 +519,10 @@ export default function Navbar() {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className={`text-xs font-black uppercase tracking-widest h-14 flex items-center border-b-3 transition-all ${
+                        className={`h-11 flex items-center text-[11px] font-semibold tracking-widest uppercase border-b-2 transition-all ${
                           pathname === link.href
-                            ? "text-[#ef4a23] border-[#ef4a23]"
-                            : "text-neutral-600 hover:text-black border-transparent"
+                            ? "text-[#c9a96e] border-[#c9a96e]"
+                            : "text-[#6b6258] hover:text-[#1a1916] border-transparent"
                         }`}
                       >
                         {link.label}
@@ -611,16 +531,13 @@ export default function Navbar() {
                   </nav>
                 </div>
 
-                {/* Deals Badge */}
+                {/* Flash Deals CTA */}
                 <Link
                   href="/deals"
-                  className="hidden lg:flex items-center gap-2 bg-linear-to-r from-[#ef4a23] to-[#d63516] text-white px-4 py-2 text-xs font-black uppercase tracking-widest hover:shadow-lg transition-all group"
+                  className="hidden lg:flex items-center gap-2 bg-[#1a1916] hover:bg-[#c9a96e] text-[#c9a96e] hover:text-[#1a1916] px-4 py-2 text-[10px] font-semibold tracking-[0.12em] uppercase transition-all duration-200"
                 >
-                  <Zap
-                    className="w-3.5 h-3.5 group-hover:animate-pulse"
-                    fill="currentColor"
-                  />
-                  Today's Deals
+                  <Zap className="w-3 h-3" fill="currentColor" />
+                  Flash Deals
                 </Link>
               </div>
             </div>
@@ -628,162 +545,149 @@ export default function Navbar() {
         )}
       </header>
 
-      {/* Mobile Menu Drawer - Redesigned */}
+      {/* ── MOBILE DRAWER ── */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/70 backdrop-blur-md z-100 md:hidden"
+              className="fixed inset-0 bg-[#1a1916]/70 z-100 md:hidden"
             />
-
-            {/* Drawer */}
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-0 bottom-0 left-0 w-[90%] max-w-90 bg-white z-101 flex flex-col shadow-2xl md:hidden"
+              className="fixed top-0 bottom-0 left-0 w-[88%] max-w-85 bg-[#faf8f5] z-101 flex flex-col shadow-2xl md:hidden font-['DM_Sans',sans-serif]"
             >
-              {/* Drawer Header */}
-              <div className="relative bg-linear-to-br from-neutral-900 to-black px-5 py-5 border-b-2 border-neutral-800">
-                <div className="flex items-center justify-between">
-                  <Link
-                    href="/"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3"
-                  >
-                    <div className="w-9 h-9 bg-white flex items-center justify-center">
-                      <span className="text-black font-black text-lg">G</span>
-                    </div>
-                    <div>
-                      <span className="block text-xl font-black tracking-tight text-white leading-none">
-                        GoNext
-                      </span>
-                      <span className="block text-[8px] font-bold tracking-[0.15em] uppercase text-neutral-400 -mt-0.5">
-                        Commerce
-                      </span>
-                    </div>
-                  </Link>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-2 text-white hover:bg-white/10 active:scale-95 transition-all"
-                  >
-                    <X className="w-5 h-5" strokeWidth={2.5} />
-                  </button>
-                </div>
+              {/* Drawer header */}
+              <div className="bg-[#1a1916] px-5 py-4 flex items-center justify-between shrink-0">
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3"
+                >
+                  <div className="w-8 h-8 bg-[#c9a96e] flex items-center justify-center">
+                    <span className="text-[#1a1916] font-semibold text-[14px] font-['Instrument_Serif',serif]">
+                      S
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[18px] font-normal text-[#f5f0e8] font-['Instrument_Serif',serif] leading-none">
+                      ShopVerse
+                    </span>
+                    <span className="block text-[8px] font-medium tracking-[0.16em] uppercase text-[#c9a96e] mt-0.5">
+                      Bangladesh
+                    </span>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 text-[#6b6560] hover:text-[#f5f0e8] transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              {/* Drawer Content */}
-              <div className="overflow-y-auto flex-1 p-5">
-                {/* Mobile Search */}
-                <form onSubmit={handleSearchSubmit} className="mb-6">
+              {/* Scrollable content */}
+              <div className="overflow-y-auto flex-1 py-4">
+                {/* Mobile search */}
+                <form onSubmit={handleSearchSubmit} className="px-4 mb-5">
                   <div className="relative">
-                    <Search
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400"
-                      strokeWidth={2.5}
-                    />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#b0a898] pointer-events-none" />
                     <input
                       type="text"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Search products..."
-                      className="w-full h-12 bg-neutral-50 border-2 border-neutral-200 pl-11 pr-4 text-sm font-semibold outline-none focus:border-[#ef4a23] transition-all"
+                      placeholder="Search products…"
+                      className="w-full h-11 bg-white border border-[#e8e2d9] pl-9 pr-4 text-[13px] text-[#1a1916] placeholder:text-[#c4bcb2] outline-none focus:border-[#c9a96e] transition-colors"
                     />
                   </div>
                 </form>
 
-                {/* Primary Links */}
-                <div className="space-y-1 mb-6 pb-6 border-b-2 border-neutral-100">
-                  <Link
-                    href="/products"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-3 py-3 text-base font-black text-neutral-900 hover:bg-neutral-50 transition-all group"
-                  >
-                    All Products
-                    <ArrowRight className="w-4 h-4 text-neutral-300 group-hover:text-[#ef4a23] group-hover:translate-x-1 transition-all" />
-                  </Link>
-                  <Link
-                    href="/products?sort_by=created_at&sort_order=desc"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-3 py-3 text-base font-black text-neutral-900 hover:bg-neutral-50 transition-all group"
-                  >
-                    New Arrivals
-                    <ArrowRight className="w-4 h-4 text-neutral-300 group-hover:text-[#ef4a23] group-hover:translate-x-1 transition-all" />
-                  </Link>
+                {/* Primary links */}
+                <div className="px-4 pb-4 mb-2 border-b border-[#ede9e2]">
+                  {[
+                    { href: "/products", label: "All Products" },
+                    {
+                      href: "/products?sort_by=created_at&sort_order=desc",
+                      label: "New Arrivals",
+                    },
+                    { href: "/products?featured=true", label: "Featured" },
+                  ].map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between py-3 text-[14px] font-medium text-[#1a1916] hover:text-[#c9a96e] border-b border-[#f0ebe3] last:border-0 transition-colors"
+                    >
+                      {link.label}
+                      <ArrowRight className="w-3.5 h-3.5 text-[#c4bcb2]" />
+                    </Link>
+                  ))}
                   <Link
                     href="/deals"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-3 py-3 bg-linear-to-r from-[#ef4a23] to-[#d63516] text-white hover:shadow-lg transition-all group"
+                    className="flex items-center justify-between py-3 text-[14px] font-semibold text-[#c9a96e] transition-colors"
                   >
-                    <span className="font-black text-base">Today's Deals</span>
-                    <Zap className="w-4 h-4" fill="currentColor" />
+                    <span className="flex items-center gap-2">
+                      <Zap className="w-3.5 h-3.5" fill="currentColor" />
+                      Flash Deals
+                    </span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
 
-                {/* Utility Links */}
-                <div className="space-y-1 mb-8">
-                  <Link
-                    href="/wishlist"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-neutral-600 hover:text-black hover:bg-neutral-50 transition-all"
-                  >
-                    <Heart className="w-4 h-4" strokeWidth={2.5} />
-                    Wishlist
-                  </Link>
-                  <Link
-                    href="/orders"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-neutral-600 hover:text-black hover:bg-neutral-50 transition-all"
-                  >
-                    <Package className="w-4 h-4" strokeWidth={2.5} />
-                    My Orders
-                  </Link>
-                  <Link
-                    href="/track"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-neutral-600 hover:text-black hover:bg-neutral-50 transition-all"
-                  >
-                    <MapPin className="w-4 h-4" strokeWidth={2.5} />
-                    Track Order
-                  </Link>
+                {/* Utility links */}
+                <div className="px-4 pb-4 mb-2 border-b border-[#ede9e2]">
+                  {[
+                    { href: "/wishlist", icon: Heart, label: "Wishlist" },
+                    { href: "/orders", icon: Package, label: "My Orders" },
+                    { href: "/track", icon: MapPin, label: "Track Order" },
+                  ].map(({ href, icon: Icon, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-2.5 text-[13px] font-medium text-[#6b6258] hover:text-[#1a1916] transition-colors"
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      {label}
+                    </Link>
+                  ))}
                 </div>
 
                 {/* Categories */}
                 {categories.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-black text-neutral-400 tracking-[0.12em] uppercase mb-3 px-3">
-                      Browse Categories
-                    </h4>
-                    <div className="space-y-0.5">
-                      {categories.map((cat) => (
-                        <Link
-                          key={cat.id}
-                          href={`/products?category_id=${cat.id}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center justify-between px-3 py-2.5 text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-50 transition-all group"
-                        >
-                          {cat.name}
-                          <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-neutral-300 group-hover:text-[#ef4a23] group-hover:translate-x-1 transition-all" />
-                        </Link>
-                      ))}
-                    </div>
+                  <div className="px-4">
+                    <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-[#c9a96e] mb-3">
+                      Categories
+                    </p>
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        href={`/products?category_id=${cat.id}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center justify-between py-2.5 text-[13px] font-medium text-[#6b6258] hover:text-[#1a1916] border-b border-[#f0ebe3] last:border-0 transition-colors"
+                      >
+                        {cat.name}
+                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-[#c4bcb2]" />
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Drawer Footer */}
+              {/* Drawer footer */}
               {!isAuthenticated && (
-                <div className="border-t-2 border-neutral-100 p-5 bg-neutral-50">
+                <div className="p-4 border-t border-[#ede9e2] shrink-0">
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block w-full bg-black hover:bg-linear-to-r hover:from-[#ef4a23] hover:to-[#d63516] text-white text-center py-3.5 text-sm font-black uppercase tracking-[0.08em] transition-all active:scale-95 shadow-lg"
+                    className="block w-full bg-[#1a1916] hover:bg-[#c9a96e] text-[#f5f0e8] hover:text-[#1a1916] text-center py-3.5 text-[12px] font-semibold uppercase tracking-widest transition-all duration-200"
                   >
                     Sign In / Register
                   </Link>

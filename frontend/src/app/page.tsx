@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import ProductCard from "@/components/product/ProductCard";
@@ -97,10 +98,10 @@ export default function HomePage() {
         </svg>
 
         <div className="site-container relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 min-h-[580px] items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 min-h-145 items-stretch">
             {/* ── Main Hero ── */}
             <div
-              className="lg:col-span-8 relative overflow-hidden cursor-pointer min-h-[380px] lg:min-h-[580px]"
+              className="lg:col-span-8 relative overflow-hidden cursor-pointer min-h-95 lg:min-h-145"
               onClick={() => router.push("/products")}
             >
               <img
@@ -109,8 +110,8 @@ export default function HomePage() {
                 className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
               />
               {/* layered gradient for text legibility */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0e0d0b]/90 via-[#0e0d0b]/50 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0e0d0b]/60 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-r from-[#0e0d0b]/90 via-[#0e0d0b]/50 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-[#0e0d0b]/60 to-transparent" />
 
               <div className="relative z-10 flex flex-col justify-end h-full p-8 md:p-14 pb-12 md:pb-16">
                 <motion.p
@@ -122,7 +123,7 @@ export default function HomePage() {
                 </motion.p>
                 <motion.h1
                   {...fadeUp(0.2)}
-                  className="text-[clamp(2.4rem,5vw,4rem)] font-normal leading-[1.06] text-[#f5f0e8] mb-5 [font-family:'Instrument_Serif',serif]"
+                  className="text-[clamp(2.4rem,5vw,4rem)] font-normal leading-[1.06] text-[#f5f0e8] mb-5 font-['Instrument_Serif',serif]"
                 >
                   Upgrade Your
                   <br />
@@ -130,7 +131,7 @@ export default function HomePage() {
                 </motion.h1>
                 <motion.p
                   {...fadeUp(0.3)}
-                  className="text-[14px] text-[#a09a8e] font-light mb-8 max-w-[400px] leading-[1.8]"
+                  className="text-[14px] text-[#a09a8e] font-light mb-8 max-w-100 leading-[1.8]"
                 >
                   High-performance laptops, desktops, and professional monitors
                   for your productivity and gaming setup.
@@ -138,7 +139,7 @@ export default function HomePage() {
                 <motion.div {...fadeUp(0.4)}>
                   <Link
                     href="/products"
-                    className="inline-flex items-center gap-2.5 bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] text-[12px] font-semibold tracking-[0.1em] uppercase px-7 py-3.5 transition-colors duration-200"
+                    className="inline-flex items-center gap-2.5 bg-[#c9a96e] hover:bg-[#b8944f] text-[#1a1916] text-[12px] font-semibold tracking-widest uppercase px-7 py-3.5 transition-colors duration-200"
                     onClick={(e) => e.stopPropagation()}
                   >
                     Shop Now
@@ -160,12 +161,12 @@ export default function HomePage() {
                   alt="Premium Headphones"
                   className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0e0d0b]/85 via-[#0e0d0b]/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0e0d0b]/85 via-[#0e0d0b]/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                   <p className="text-[9px] text-[#c9a96e] font-semibold tracking-[0.16em] uppercase mb-1">
                     Audio
                   </p>
-                  <h4 className="text-[16px] font-normal text-[#f5f0e8] [font-family:'Instrument_Serif',serif] mb-1">
+                  <h4 className="text-[16px] font-normal text-[#f5f0e8] font-['Instrument_Serif',serif] mb-1">
                     Premium Headphones
                   </h4>
                   <p className="text-[11px] text-[#6b6560] mb-3">
@@ -191,12 +192,12 @@ export default function HomePage() {
                   alt="Smartphones"
                   className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0e0d0b]/85 via-[#0e0d0b]/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0e0d0b]/85 via-[#0e0d0b]/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                   <p className="text-[9px] text-[#c9a96e] font-semibold tracking-[0.16em] uppercase mb-1">
                     Mobile
                   </p>
-                  <h4 className="text-[16px] font-normal text-[#f5f0e8] [font-family:'Instrument_Serif',serif] mb-1">
+                  <h4 className="text-[16px] font-normal text-[#f5f0e8] font-['Instrument_Serif',serif] mb-1">
                     Smartphones & Accessories
                   </h4>
                   <p className="text-[11px] text-[#6b6560] mb-3">
