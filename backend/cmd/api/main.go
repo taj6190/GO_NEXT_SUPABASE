@@ -114,7 +114,7 @@ func main() {
 			"http://localhost:3000",
 		},
 		AllowMethods: []string{
-			"GET", "POST", "PUT", "DELETE", "OPTIONS",
+			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH",
 		},
 		AllowHeaders: []string{
 			"Origin",
@@ -122,9 +122,12 @@ func main() {
 			"Authorization",
 			"X-Session-ID",
 		},
+		ExposeHeaders: []string{
+			"Content-Length",
+		},
 		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
-
 	// Global middleware
 	r.Use(middleware.CORSMiddleware(cfg.FrontendURL))
 	r.Use(middleware.RateLimitMiddleware(1000, time.Minute))
