@@ -411,6 +411,7 @@ export default function ProductDetailPage() {
                     name: product.name,
                     slug: product.slug,
                     price: currentPrice,
+                    discount_price: currentDiscountPrice,
                     image_url:
                       galleryImages[galleryIdx]?.image_url ||
                       product.images?.[0]?.image_url,
