@@ -81,7 +81,7 @@ func main() {
 	productService := service.NewProductService(productRepo, rdb)
 	categoryService := service.NewCategoryService(categoryRepo, rdb)
 	cartService := service.NewCartService(cartRepo, productRepo)
-	emailService := service.NewEmailService(cfg)
+	emailService := service.NewEmailService(cfg, userRepo)
 	orderService := service.NewOrderService(orderRepo, cartRepo, productRepo, couponRepo, paymentRepo, addressRepo, emailService, rdb)
 	paymentService := service.NewPaymentService(paymentRepo, orderRepo)
 	couponService := service.NewCouponService(couponRepo, rdb)

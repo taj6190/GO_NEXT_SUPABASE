@@ -13,7 +13,8 @@ import (
 
 // EmailService handles email sending for the application
 type EmailService struct {
-	cfg *config.Config
+	cfg      *config.Config
+	userRepo domain.UserRepository
 }
 
 // EmailPayload represents data for sending emails
@@ -35,17 +36,29 @@ func (s *EmailService) formatAddress(addr *domain.Address) string {
 }
 
 // NewEmailService creates a new email service
-func NewEmailService(cfg *config.Config) *EmailService {
-	return &EmailService{cfg: cfg}
+func NewEmailService(cfg *config.Config, userRepo domain.UserRepository) *EmailService {
+	return &EmailService{cfg: cfg, userRepo: userRepo}
 }
 
 // SendOrderConfirmationEmail sends order confirmation to customer
 // This is called after successful order creation
 func (s *EmailService) SendOrderConfirmationEmail(ctx context.Context, order *domain.Order, items []domain.OrderItem) error {
 	email := order.GuestEmail
+
+	// If guest email is not provided but user is logged in, fetch user's email
 	if email == "" && order.UserID != nil {
-		// In production, fetch user email from database
-		// For now, we'll skip if no email available
+		user, err := s.userRepo.GetByID(ctx, *order.UserID)
+		if err == nil && user != nil {
+			email = user.Email
+		} else {
+			log.Printf("⚠️  Could not fetch user email for order %s: %v", order.OrderNumber, err)
+			return nil
+		}
+	}
+
+	// Skip if still no email available
+	if email == "" {
+		log.Printf("⚠️  No email address found for order %s", order.OrderNumber)
 		return nil
 	}
 
@@ -68,7 +81,21 @@ func (s *EmailService) SendOrderConfirmationEmail(ctx context.Context, order *do
 // SendShippingNotificationEmail notifies customer when order ships
 func (s *EmailService) SendShippingNotificationEmail(ctx context.Context, order *domain.Order) error {
 	email := order.GuestEmail
+
+	// If guest email is not provided but user is logged in, fetch user's email
+	if email == "" && order.UserID != nil {
+		user, err := s.userRepo.GetByID(ctx, *order.UserID)
+		if err == nil && user != nil {
+			email = user.Email
+		} else {
+			log.Printf("⚠️  Could not fetch user email for order %s: %v", order.OrderNumber, err)
+			return nil
+		}
+	}
+
+	// Skip if still no email available
 	if email == "" {
+		log.Printf("⚠️  No email address found for order %s", order.OrderNumber)
 		return nil
 	}
 
