@@ -6,7 +6,7 @@ import api from "@/lib/api";
 import { formatPrice, getEffectivePrice } from "@/lib/utils";
 import { useAuthStore, useCartStore, useUIStore } from "@/store";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Loader2, ShieldCheck, Truck, X } from "lucide-react";
+import { ArrowRight, Loader2, ShieldCheck, Truck, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -24,7 +24,7 @@ export default function BuyNowModal() {
   const router = useRouter();
   const { buyNowProduct, setBuyNowProduct } = useUIStore();
   const { isAuthenticated, user } = useAuthStore();
-  const { addItem, clearCart, fetchCart } = useCartStore();
+  const { addItem } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<CheckoutForm>({
     full_name: user?.full_name || "",
@@ -48,89 +48,59 @@ export default function BuyNowModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!form.full_name.trim()) {
-      toast.error("Please enter your name");
-      return;
-    }
-    if (!form.phone.trim()) {
-      toast.error("Please enter your phone number");
+    if (!form.full_name.trim() || !form.phone.trim()) {
+      toast.error("Please fill in required fields");
       return;
     }
 
     setLoading(true);
     try {
-      // Step 1: Add item to cart
       await addItem(
         buyNowProduct.id,
         buyNowProduct.quantity,
         buyNowProduct.variantId,
       );
 
-      // Step 2: Create/update shipping address (only if address provided)
       let addressId: string | undefined;
-
       if (form.address_line1.trim()) {
         const { data: addrData } = await api.post("/addresses", {
           full_name: form.full_name,
           phone: form.phone,
           address_line1: form.address_line1,
-          city: "Dhaka", // Default city
-          district: "Dhaka", // Default district
+          city: "Dhaka",
+          district: "Dhaka",
           postal_code: "",
           is_default: true,
         });
-
-        if (!addrData.success) {
-          toast.error(addrData.error || "Failed to save address");
-          setLoading(false);
-          return;
-        }
-
-        addressId = addrData.data?.id;
+        if (addrData.success) addressId = addrData.data?.id;
       }
 
-      // Step 3: Create order using the cart items
       const orderPayload: Record<string, unknown> = {
         payment_method: form.paymentMethod,
+        ...(addressId && { shipping_address_id: addressId }),
+        ...(!isAuthenticated && {
+          guest_email: form.email || "",
+          guest_phone: form.phone,
+        }),
       };
-
-      // Add address only if it exists
-      if (addressId) {
-        orderPayload.shipping_address_id = addressId;
-      }
-
-      // Add guest info if not authenticated
-      if (!isAuthenticated) {
-        orderPayload.guest_email = form.email || "";
-        orderPayload.guest_phone = form.phone;
-      }
 
       const { data } = await api.post("/orders", orderPayload);
 
       if (data.success) {
         toast.success("Order placed successfully!");
         handleClose();
-
-        const orderNumber = data.data?.order_number;
-
-        // Redirect based on user type
         if (isAuthenticated) {
-          // Authenticated users go to orders page
           router.push("/orders");
         } else {
-          // Guest users go to confirmation page with email
-          const confirmUrl = `/order-confirmation?order=${orderNumber}${
-            form.email ? `&email=${encodeURIComponent(form.email)}` : ""
-          }`;
-          router.push(confirmUrl);
+          router.push(
+            `/order-confirmation?order=${data.data?.order_number}${form.email ? `&email=${encodeURIComponent(form.email)}` : ""}`,
+          );
         }
       } else {
         toast.error(data.error || "Failed to place order");
       }
     } catch (error: any) {
-      const msg = error?.response?.data?.error || "Failed to place order";
-      toast.error(msg);
+      toast.error(error?.response?.data?.error || "Failed to place order");
     } finally {
       setLoading(false);
     }
@@ -140,256 +110,226 @@ export default function BuyNowModal() {
     <AnimatePresence>
       {buyNowProduct && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/50 z-[99]"
+            className="fixed inset-0 bg-[#1a1916]/60 z-[99] backdrop-blur-sm"
           />
 
-          {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-2xl max-h-[90vh] bg-white rounded-3xl shadow-2xl z-[100] overflow-y-auto"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-auto max-h-[95vh] bg-white shadow-[20px_20px_0px_0px_#1a1916] z-[100] flex flex-col md:flex-row overflow-hidden border-4 border-[#1a1916]"
           >
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between z-10">
-              <div>
-                <h2 className="text-xl font-bold text-black">Quick Checkout</h2>
-                <p className="text-xs text-neutral-500 mt-1">
-                  Complete your purchase in seconds
-                </p>
+            {/* Left Column: Summary (The "Receipt" Look) */}
+            <div className="w-full md:w-80 bg-[#faf8f5] border-b-4 md:border-b-0 md:border-r-4 border-[#1a1916] p-6 flex flex-col">
+              <div className="flex justify-between items-start mb-8">
+                <h2 className="text-xl font-bold uppercase tracking-tighter text-[#1a1916] font-['DM_Sans',sans-serif]">
+                  Order Summary
+                </h2>
+                <button
+                  onClick={handleClose}
+                  className="p-1 hover:bg-[#1a1916] hover:text-white transition-colors border border-[#1a1916]"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                onClick={handleClose}
-                disabled={loading}
-                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors disabled:opacity-50"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            {/* Content */}
-            <div className="p-6 space-y-6">
-              {/* Product Summary */}
-              <div className="bg-neutral-50 rounded-2xl p-4">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-neutral-200">
+              <div className="flex-1 space-y-6">
+                <div className="space-y-3">
+                  <div className="aspect-square w-full bg-white border-2 border-[#ede9e2] p-2">
                     <Image
                       src={
                         buyNowProduct.image_url ||
-                        "https://via.placeholder.com/80"
+                        "https://via.placeholder.com/120"
                       }
                       alt={buyNowProduct.name}
-                      width={80}
-                      height={80}
+                      width={120}
+                      height={120}
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-sm text-black line-clamp-2">
+                  <div className="font-['DM_Sans',sans-serif]">
+                    <h3 className="font-semibold text-[#1a1916] leading-tight text-sm">
                       {buyNowProduct.name}
                     </h3>
-                    <p className="text-xs text-neutral-500 mt-2">
-                      Qty: {buyNowProduct.quantity}
+                    <p className="text-[10px] font-medium text-[#9a9086] uppercase tracking-widest">
+                      QTY: {buyNowProduct.quantity}
                     </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-lg font-bold text-[#ef4a23]">
-                        {formatPrice(ep.current * buyNowProduct.quantity)}
-                      </span>
-                      {ep.original && (
-                        <span className="text-xs text-neutral-500 line-through">
-                          {formatPrice(
-                            (ep.original as number) * buyNowProduct.quantity,
-                          )}
-                        </span>
-                      )}
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-xs font-medium font-['DM_Sans',sans-serif]">
+                  <div className="flex justify-between">
+                    <span className="text-[#9a9086]">Subtotal</span>
+                    <span className="text-[#1a1916]">
+                      {formatPrice(subtotal)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#9a9086]">Shipping</span>
+                    <span className="text-[#1a1916]">
+                      {formatPrice(shippingCost)}
+                    </span>
+                  </div>
+                  <div className="pt-4 border-t-2 border-[#ede9e2] flex justify-between items-center">
+                    <span className="font-bold uppercase text-[10px] text-[#1a1916]">
+                      Total
+                    </span>
+                    <span className="text-xl font-bold text-[#c9a96e]">
+                      {formatPrice(total)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-auto pt-6 space-y-2">
+                <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-[#9a9086] font-['DM_Sans',sans-serif]">
+                  <ShieldCheck className="w-3 h-3" /> Secure Checkout
+                </div>
+                <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-[#9a9086] font-['DM_Sans',sans-serif]">
+                  <Truck className="w-3 h-3" /> Express Delivery
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Form */}
+            <div className="flex-1 p-6 md:p-10 overflow-y-auto bg-white font-['DM_Sans',sans-serif]">
+              <div className="max-w-lg mx-auto">
+                <header className="mb-8">
+                  <h2 className="text-2xl font-bold uppercase tracking-tight text-[#1a1916]">
+                    Shipping Details
+                  </h2>
+                  <p className="text-[#9a9086] text-xs mt-1">
+                    Please provide your delivery information
+                  </p>
+                </header>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[#1a1916]">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.full_name}
+                        onChange={(e) =>
+                          setForm({ ...form, full_name: e.target.value })
+                        }
+                        className="w-full px-4 py-3 border border-[#ede9e2] focus:border-[#c9a96e] outline-none transition-colors text-xs font-medium text-[#1a1916]"
+                        placeholder="John Doe"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[#1a1916]">
+                        Phone Number *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={form.phone}
+                        onChange={(e) =>
+                          setForm({ ...form, phone: e.target.value })
+                        }
+                        className="w-full px-4 py-3 border border-[#ede9e2] focus:border-[#c9a96e] outline-none transition-colors text-xs font-medium text-[#1a1916]"
+                        placeholder="01700000000"
+                        disabled={loading}
+                      />
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Price Breakdown */}
-              <div className="space-y-2 bg-neutral-50 rounded-2xl p-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Subtotal</span>
-                  <span className="font-semibold text-black">
-                    {formatPrice(subtotal)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Shipping</span>
-                  <span className="font-semibold text-black">
-                    {formatPrice(shippingCost)}
-                  </span>
-                </div>
-                <div className="border-t border-neutral-200 pt-2 flex justify-between items-center">
-                  <span className="font-bold text-black">Total</span>
-                  <span className="text-xl font-bold text-[#ef4a23]">
-                    {formatPrice(total)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Checkout Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Name */}
-                <div>
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={form.full_name}
-                    onChange={(e) =>
-                      setForm({ ...form, full_name: e.target.value })
-                    }
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef4a23] text-sm"
-                    placeholder="Your full name"
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={form.phone}
-                    onChange={(e) =>
-                      setForm({ ...form, phone: e.target.value })
-                    }
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef4a23] text-sm"
-                    placeholder="01700000000"
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Email (Optional) */}
-                <div>
-                  <label className="block text-xs font-bold text-neutral-600 mb-2">
-                    Email{" "}
-                    <span className="text-xs text-neutral-500">(optional)</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef4a23] text-sm"
-                    placeholder="your@email.com"
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Address (Optional) */}
-                <div>
-                  <label className="block text-xs font-bold text-neutral-600 mb-2">
-                    Delivery Address{" "}
-                    <span className="text-xs text-neutral-500">(optional)</span>
-                  </label>
-                  <textarea
-                    value={form.address_line1}
-                    onChange={(e) =>
-                      setForm({ ...form, address_line1: e.target.value })
-                    }
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef4a23] text-sm resize-none h-20"
-                    placeholder="Your full address"
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Payment Method */}
-                <div>
-                  <label className="block text-xs font-bold text-black mb-3">
-                    Payment Method
-                  </label>
                   <div className="space-y-2">
-                    {[
-                      {
-                        value: "cod",
-                        label: "Cash on Delivery (COD)",
-                        icon: "📦",
-                      },
-                      {
-                        value: "bkash",
-                        label: "bKash",
-                        icon: "📱",
-                      },
-                      {
-                        value: "nagad",
-                        label: "Nagad",
-                        icon: "📱",
-                      },
-                    ].map((method) => (
-                      <label
-                        key={method.value}
-                        className="flex items-center gap-3 p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50 transition-colors"
-                      >
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value={method.value}
-                          checked={form.paymentMethod === method.value}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              paymentMethod: e.target.value as any,
-                            })
-                          }
-                          className="w-4 h-4 cursor-pointer"
-                          disabled={loading}
-                        />
-                        <span className="text-lg">{method.icon}</span>
-                        <span className="text-sm font-semibold text-black">
-                          {method.label}
-                        </span>
-                      </label>
-                    ))}
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#9a9086]">
+                      Email (Optional)
+                    </label>
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) =>
+                        setForm({ ...form, email: e.target.value })
+                      }
+                      className="w-full px-4 py-3 border border-[#ede9e2] focus:border-[#c9a96e] outline-none transition-colors text-xs font-medium text-[#1a1916]"
+                      placeholder="john@example.com"
+                      disabled={loading}
+                    />
                   </div>
-                </div>
 
-                {/* Trust Badges */}
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  <div className="flex items-center gap-2 text-xs">
-                    <ShieldCheck className="w-4 h-4 text-green-600" />
-                    <span className="text-neutral-700">Secure Checkout</span>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#9a9086]">
+                      Delivery Address
+                    </label>
+                    <textarea
+                      value={form.address_line1}
+                      onChange={(e) =>
+                        setForm({ ...form, address_line1: e.target.value })
+                      }
+                      className="w-full px-4 py-3 border border-[#ede9e2] focus:border-[#c9a96e] outline-none transition-colors text-xs font-medium text-[#1a1916] resize-none h-24"
+                      placeholder="House #, Road #, Area, City"
+                      disabled={loading}
+                    />
                   </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <Truck className="w-4 h-4 text-blue-600" />
-                    <span className="text-neutral-700">Fast Delivery</span>
-                  </div>
-                </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full mt-6 bg-linear-to-r from-[#ef4a23] to-[#d63516] text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#1a1916]">
+                      Payment Method
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {["cod", "bkash", "nagad"].map((method) => (
+                        <label
+                          key={method}
+                          className={`
+                            relative cursor-pointer border transition-all p-3 text-center
+                            ${
+                              form.paymentMethod === method
+                                ? "border-[#1a1916] bg-[#1a1916] text-[#faf8f5]"
+                                : "border-[#ede9e2] bg-white text-[#1a1916] hover:border-[#c9a96e]"
+                            }
+                          `}
+                        >
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            className="hidden"
+                            value={method}
+                            checked={form.paymentMethod === method}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                paymentMethod: e.target.value as any,
+                              })
+                            }
+                            disabled={loading}
+                          />
+                          <span className="text-[10px] font-bold uppercase">
+                            {method}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full group relative bg-[#c9a96e] text-[#1a1916] font-bold uppercase tracking-widest py-4 transition-all hover:bg-[#1a1916] hover:text-white disabled:opacity-50 flex items-center justify-center gap-3 border-2 border-[#1a1916] shadow-[4px_4px_0px_0px_#1a1916] active:translate-x-1 active:translate-y-1 active:shadow-none text-xs"
+                  >
+                    {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      Place Order Now
-                    </>
-                  )}
-                </button>
-              </form>
+                    ) : (
+                      <>
+                        Complete Order{" "}
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
           </motion.div>
         </>

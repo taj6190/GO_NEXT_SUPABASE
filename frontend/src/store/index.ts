@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { CartItem, User } from "@/lib/types";
+import { CartItem, Category, User } from "@/lib/types";
 import { getEffectivePrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { create } from "zustand";
@@ -204,16 +204,6 @@ export const useUIStore = create<UIState>((set) => ({
 }));
 
 // Categories Store (Global Cache)
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  image_url?: string;
-  description?: string;
-  parent_id?: string;
-  children?: Category[];
-}
-
 interface CategoryState {
   categories: Category[];
   isLoading: boolean;

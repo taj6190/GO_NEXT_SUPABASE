@@ -1,3 +1,4 @@
+import WhatsAppButton from "@/components/contact/WhatsAppButton";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
 import Providers from "@/components/Providers";
@@ -10,12 +11,15 @@ export const metadata: Metadata = {
     default: "GoNext — Premium eCommerce",
     template: "%s | GoNext",
   },
-  description: "Discover premium products with the best deals. Fast delivery across Bangladesh with bKash, Nagad & COD payment options.",
-  keywords: "ecommerce, shopping, bangladesh, online store, gonext, bkash, nagad, cod, premium products",
+  description:
+    "Discover premium products with the best deals. Fast delivery across Bangladesh with bKash, Nagad & COD payment options.",
+  keywords:
+    "ecommerce, shopping, bangladesh, online store, gonext, bkash, nagad, cod, premium products",
   authors: [{ name: "GoNext" }],
   openGraph: {
     title: "GoNext — Premium eCommerce",
-    description: "Shop premium products at unbeatable prices. Fast delivery across Bangladesh.",
+    description:
+      "Shop premium products at unbeatable prices. Fast delivery across Bangladesh.",
     type: "website",
     locale: "en_BD",
     siteName: "GoNext",
@@ -32,7 +36,11 @@ export const viewport: Viewport = {
   themeColor: "#0a0a0f",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col">
@@ -65,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
             }}
           />
+          <WhatsAppButton />
         </Providers>
       </body>
     </html>

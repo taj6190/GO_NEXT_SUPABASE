@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
+import WhatsAppButton from "@/components/contact/WhatsAppButton";
 import ImageGallery from "@/components/product/ImageGallery";
 import ProductCard from "@/components/product/ProductCard";
 import ReviewSection from "@/components/product/ReviewSection";
@@ -397,6 +398,28 @@ export default function ProductDetailPage() {
                 <Heart className="w-5 h-5" strokeWidth={1.5} />
               </button>
             </div>
+
+            {/* WhatsApp Inquiry Button */}
+            {product && (
+              <div className="mt-4">
+                <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest mb-3 px-4 sm:px-0">
+                  আরও তথ্যের জন্য
+                </p>
+                <WhatsAppButton
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug,
+                    price: currentPrice,
+                    image_url:
+                      galleryImages[galleryIdx]?.image_url ||
+                      product.images?.[0]?.image_url,
+                  }}
+                  variant="inline"
+                  className="w-full sm:w-auto h-12 text-sm"
+                />
+              </div>
+            )}
           </div>
 
           {/* Delivery & Guarantees - Minimal List */}
