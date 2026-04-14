@@ -246,7 +246,7 @@ export default function HomePage() {
                 key={item.label}
                 className="flex items-center gap-2.5 whitespace-nowrap px-8"
               >
-                <item.icon className="w-3.5 h-3.5 text-[#c9a96e] flex-shrink-0" />
+                <item.icon className="w-3.5 h-3.5 text-[#c9a96e] shrink-0" />
                 <span className="text-[11px] font-medium text-[#f5f0e8] tracking-[0.06em]">
                   {item.label}
                 </span>

@@ -91,11 +91,6 @@ export default function WhatsAppButton({
               <div className="absolute top-full right-3 w-2 h-2 bg-[#1a1916] transform rotate-45"></div>
             </div>
           </Link>
-
-          {/* Mobile-only label */}
-          <div className="md:hidden absolute bottom-full right-full mr-3 mb-2 bg-[#1a1916] text-white text-xs px-3 py-1.5 rounded whitespace-nowrap pointer-events-none">
-            সাপোর্ট
-          </div>
         </motion.div>
       </motion.div>
     );
