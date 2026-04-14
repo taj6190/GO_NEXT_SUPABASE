@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/smtp"
+	"strings"
 	"time"
 
 	"github.com/gonext-ecommerce/backend/internal/config"
@@ -141,13 +142,25 @@ func (s *EmailService) sendEmail(ctx context.Context, payload EmailPayload) {
 	addr := fmt.Sprintf("%s:%s", s.cfg.SMTPHost, s.cfg.SMTPPort)
 	auth := smtp.PlainAuth("", s.cfg.SMTPUsername, s.cfg.SMTPPassword, s.cfg.SMTPHost)
 
+	// Extract just the email address from EmailFrom for SMTP protocol
+	// (EmailFrom can be "StoreBD <email@domain.com>" but SMTP needs just "email@domain.com")
+	smtpFromEmail := s.cfg.SMTPUsername
+	if strings.Contains(s.cfg.EmailFrom, "<") && strings.Contains(s.cfg.EmailFrom, ">") {
+		// Extract email from "Name <email@domain.com>" format
+		start := strings.Index(s.cfg.EmailFrom, "<")
+		end := strings.Index(s.cfg.EmailFrom, ">")
+		if start != -1 && end != -1 && end > start {
+			smtpFromEmail = s.cfg.EmailFrom[start+1 : end]
+		}
+	}
+
 	// Send email with timeout
 	sendCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	done := make(chan error, 1)
 	go func() {
-		err := smtp.SendMail(addr, auth, s.cfg.EmailFrom, []string{payload.To}, []byte(message))
+		err := smtp.SendMail(addr, auth, smtpFromEmail, []string{payload.To}, []byte(message))
 		done <- err
 	}()
 
