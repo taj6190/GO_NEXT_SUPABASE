@@ -14,13 +14,14 @@ import (
 )
 
 type OrderService struct {
-	orderRepo   domain.OrderRepository
-	cartRepo    domain.CartRepository
-	productRepo domain.ProductRepository
-	couponRepo  domain.CouponRepository
-	paymentRepo domain.PaymentRepository
-	addressRepo domain.AddressRepository
-	cache       *utils.CacheManager
+	orderRepo    domain.OrderRepository
+	cartRepo     domain.CartRepository
+	productRepo  domain.ProductRepository
+	couponRepo   domain.CouponRepository
+	paymentRepo  domain.PaymentRepository
+	addressRepo  domain.AddressRepository
+	emailService *EmailService
+	cache        *utils.CacheManager
 }
 
 func NewOrderService(
@@ -30,16 +31,18 @@ func NewOrderService(
 	couponRepo domain.CouponRepository,
 	paymentRepo domain.PaymentRepository,
 	addressRepo domain.AddressRepository,
+	emailService *EmailService,
 	rdb *redis.Client,
 ) *OrderService {
 	return &OrderService{
-		orderRepo:   orderRepo,
-		cartRepo:    cartRepo,
-		productRepo: productRepo,
-		couponRepo:  couponRepo,
-		paymentRepo: paymentRepo,
-		addressRepo: addressRepo,
-		cache:       utils.NewCacheManager(rdb),
+		orderRepo:    orderRepo,
+		cartRepo:     cartRepo,
+		productRepo:  productRepo,
+		couponRepo:   couponRepo,
+		paymentRepo:  paymentRepo,
+		addressRepo:  addressRepo,
+		emailService: emailService,
+		cache:        utils.NewCacheManager(rdb),
 	}
 }
 
@@ -269,6 +272,10 @@ func (s *OrderService) CreateOrder(ctx context.Context, userID *uuid.UUID, sessi
 
 	order.Items = orderItems
 	order.Payment = payment
+
+	// Send confirmation email
+	_ = s.emailService.SendOrderConfirmationEmail(ctx, order, orderItems)
+
 	return order, nil
 }
 

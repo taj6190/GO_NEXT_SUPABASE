@@ -22,6 +22,14 @@ type Config struct {
 	FrontendURL      string
 	AdminEmail       string
 	AdminPassword    string
+	// Email Configuration
+	SMTPHost     string
+	SMTPPort     string
+	SMTPUsername string
+	SMTPPassword string
+	EmailFrom    string
+	StoreName    string
+	StorePhone   string
 }
 
 func Load() (*Config, error) {
@@ -39,6 +47,14 @@ func Load() (*Config, error) {
 		FrontendURL:      getEnv("FRONTEND_URL", "http://localhost:3000"),
 		AdminEmail:       getEnv("ADMIN_EMAIL", "admin@gonext.com"),
 		AdminPassword:    getEnv("ADMIN_PASSWORD", "admin123456"),
+		// Email Configuration (Bangladesh-focused)
+		SMTPHost:     getEnv("SMTP_HOST", "smtp.gmail.com"),
+		SMTPPort:     getEnv("SMTP_PORT", "587"),
+		SMTPUsername: getEnv("SMTP_USERNAME", ""),
+		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+		EmailFrom:    getEnv("EMAIL_FROM", "noreply@storebd.com"),
+		StoreName:    getEnv("STORE_NAME", "StoreBD"),
+		StorePhone:   getEnv("STORE_PHONE", "+880-1XXXXXXXXX"),
 	}
 
 	if cfg.DatabaseURL == "" {

@@ -59,12 +59,13 @@ func (e *DomainError) Error() string {
 }
 
 var (
-	ErrNotFound       = &DomainError{Code: 404, Message: "resource not found"}
-	ErrDuplicate      = &DomainError{Code: 409, Message: "resource already exists"}
-	ErrUnauthorized   = &DomainError{Code: 401, Message: "unauthorized"}
-	ErrForbidden      = &DomainError{Code: 403, Message: "forbidden"}
-	ErrBadRequest     = &DomainError{Code: 400, Message: "bad request"}
-	ErrInternalServer = &DomainError{Code: 500, Message: "internal server error"}
-	ErrOutOfStock     = &DomainError{Code: 400, Message: "product is out of stock"}
-	ErrInvalidCoupon  = &DomainError{Code: 400, Message: "invalid or expired coupon"}
+	ErrNotFound           = &DomainError{Code: 404, Message: "resource not found"}
+	ErrDuplicate          = &DomainError{Code: 409, Message: "resource already exists"}
+	ErrUnauthorized       = &DomainError{Code: 401, Message: "unauthorized"}
+	ErrForbidden          = &DomainError{Code: 403, Message: "forbidden"}
+	ErrBadRequest         = &DomainError{Code: 400, Message: "bad request"}
+	ErrInternalServer     = &DomainError{Code: 500, Message: "internal server error"}
+	ErrOutOfStock         = &DomainError{Code: 400, Message: "product is out of stock"}
+	ErrInvalidCoupon      = &DomainError{Code: 400, Message: "invalid or expired coupon"}
+	ErrCircuitBreakerOpen = errors.New("circuit breaker is open")
 )
