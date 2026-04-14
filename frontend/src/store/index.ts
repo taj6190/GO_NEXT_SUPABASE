@@ -116,8 +116,19 @@ export const useCartStore = create<CartState>((set, get) => ({
       quantity,
     };
     if (variantId) payload.variant_id = variantId;
-    await api.post("/cart/items", payload);
-    await get().fetchCart();
+
+    try {
+      // Fire API request but don't wait for full cart refresh
+      const { data } = await api.post("/cart/items", payload);
+      if (data.success) {
+        // Do a lightweight cart update instead of full refetch
+        await get().fetchCart();
+      }
+    } catch (err) {
+      // Refetch on error to ensure consistency
+      await get().fetchCart();
+      throw err;
+    }
   },
 
   updateQuantity: async (itemId, quantity) => {
@@ -243,5 +254,55 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     }
 
     return state.categories;
+  },
+}));
+
+// Product Cache Store (Performance: Avoid re-fetching same product)
+interface CachedProduct {
+  data: any;
+  cachedAt: number;
+}
+
+interface ProductCacheState {
+  productCache: Map<string, CachedProduct>;
+  relatedCache: Map<string, CachedProduct>;
+  cacheProduct: (slug: string, product: any) => void;
+  getCachedProduct: (slug: string) => any | null;
+  cacheRelated: (slug: string, products: any[]) => void;
+  getCachedRelated: (slug: string) => any[] | null;
+}
+
+const PRODUCT_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+export const useProductCacheStore = create<ProductCacheState>((set, get) => ({
+  productCache: new Map(),
+  relatedCache: new Map(),
+
+  cacheProduct: (slug, product) => {
+    const cache = new Map(get().productCache);
+    cache.set(slug, { data: product, cachedAt: Date.now() });
+    set({ productCache: cache });
+  },
+
+  getCachedProduct: (slug) => {
+    const cached = get().productCache.get(slug);
+    if (cached && Date.now() - cached.cachedAt < PRODUCT_CACHE_TTL) {
+      return cached.data;
+    }
+    return null;
+  },
+
+  cacheRelated: (slug, products) => {
+    const cache = new Map(get().relatedCache);
+    cache.set(slug, { data: products, cachedAt: Date.now() });
+    set({ relatedCache: cache });
+  },
+
+  getCachedRelated: (slug) => {
+    const cached = get().relatedCache.get(slug);
+    if (cached && Date.now() - cached.cachedAt < PRODUCT_CACHE_TTL) {
+      return cached.data;
+    }
+    return null;
   },
 }));

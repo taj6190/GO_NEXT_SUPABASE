@@ -385,7 +385,7 @@ export default function Navbar() {
               </button>
 
               {/* ── ACTION ICONS ── */}
-              <div className="hidden md:flex items-center gap-0.5 ml-2">
+              <div className="hidden md:flex items-e gap-0.5 ml-2md:hidden p-2.5 text-[#6b6258] hover:text-[#1a1916] hover:bg-[#f0ebe3] transition-colors ml-auto">
                 <Link
                   href="/wishlist"
                   className="p-2.5 text-[#6b6258] hover:text-[#1a1916] hover:bg-[#f0ebe3] transition-colors"

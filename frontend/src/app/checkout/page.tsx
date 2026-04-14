@@ -285,26 +285,33 @@ export default function CheckoutPage() {
                     label: "Cash on Delivery",
                     desc: "Pay when you receive • No advance payment needed",
                     icon: Truck,
+                    comingSoon: false,
                   },
                   {
                     id: "bkash" as const,
                     label: "bKash Payment",
                     desc: "Secure mobile banking • Pay now",
                     icon: CreditCard,
+                    comingSoon: true,
                   },
                   {
                     id: "nagad" as const,
                     label: "Nagad Payment",
                     desc: "Secure mobile banking • Pay now",
                     icon: CreditCard,
+                    comingSoon: true,
                   },
                 ].map((method) => (
                   <label
                     key={method.id}
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      form.paymentMethod === method.id
-                        ? "border-[var(--brand)] bg-[var(--brand-bg)]"
-                        : "border-[var(--border)] hover:border-[var(--brand-light)]"
+                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+                      method.comingSoon
+                        ? "cursor-not-allowed opacity-50 border-[#ddd] bg-[#f5f5f5]"
+                        : `cursor-pointer ${
+                            form.paymentMethod === method.id
+                              ? "border-[var(--brand)] bg-[var(--brand-bg)]"
+                              : "border-[var(--border)] hover:border-[var(--brand-light)]"
+                          }`
                     }`}
                   >
                     <div className="flex items-center h-6">
@@ -313,30 +320,54 @@ export default function CheckoutPage() {
                         name="paymentMethod"
                         value={method.id}
                         checked={form.paymentMethod === method.id}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            paymentMethod: e.target.value as
-                              | "cod"
-                              | "bkash"
-                              | "nagad",
-                          })
-                        }
-                        className="w-5 h-5"
+                        onChange={(e) => {
+                          if (!method.comingSoon) {
+                            setForm({
+                              ...form,
+                              paymentMethod: e.target.value as
+                                | "cod"
+                                | "bkash"
+                                | "nagad",
+                            });
+                          }
+                        }}
+                        disabled={method.comingSoon}
+                        className="w-5 h-5 cursor-pointer"
                       />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <method.icon className="w-4 h-4 text-[var(--accent)]" />
-                        <span className="font-semibold text-sm">
+                        <method.icon
+                          className={`w-4 h-4 ${
+                            method.comingSoon
+                              ? "text-gray-400"
+                              : "text-[var(--accent)]"
+                          }`}
+                        />
+                        <span
+                          className={`font-semibold text-sm ${
+                            method.comingSoon ? "text-gray-500" : ""
+                          }`}
+                        >
                           {method.label}
                         </span>
+                        {method.comingSoon && (
+                          <span className="text-[10px] font-bold px-2 py-1 bg-amber-100 text-amber-700 rounded uppercase tracking-wider">
+                            Coming Soon
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-[var(--text-muted)]">
+                      <p
+                        className={`text-xs ${
+                          method.comingSoon
+                            ? "text-gray-500"
+                            : "text-[var(--text-muted)]"
+                        }`}
+                      >
                         {method.desc}
                       </p>
                     </div>
-                    {form.paymentMethod === method.id && (
+                    {form.paymentMethod === method.id && !method.comingSoon && (
                       <Check className="w-5 h-5 text-[var(--brand)]" />
                     )}
                   </label>

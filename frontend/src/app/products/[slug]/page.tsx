@@ -15,7 +15,12 @@ import {
   getEffectivePrice,
   hasVariants,
 } from "@/lib/utils";
-import { useAuthStore, useCartStore, useUIStore } from "@/store";
+import {
+  useAuthStore,
+  useCartStore,
+  useProductCacheStore,
+  useUIStore,
+} from "@/store";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Check,
@@ -50,17 +55,48 @@ export default function ProductDetailPage() {
   const addItem = useCartStore((s) => s.addItem);
   const { isAuthenticated } = useAuthStore();
   const { setBuyNowProduct } = useUIStore();
+  const { getCachedProduct, cacheProduct, getCachedRelated, cacheRelated } =
+    useProductCacheStore();
 
   useEffect(() => {
     if (slug) {
       setLoading(true);
-      api
-        .get(`/products/${slug}`)
-        .then(({ data }) => {
-          if (data.success) {
-            setProduct(data.data);
-            if (data.data.variants?.length > 0) {
-              const firstVariant = data.data.variants[0];
+
+      // Check cache first for instant display
+      const cachedProduct = getCachedProduct(slug as string);
+      const cachedRelatedProducts = getCachedRelated(slug as string);
+
+      if (cachedProduct) {
+        setProduct(cachedProduct);
+        if (cachedProduct.variants?.length > 0) {
+          const firstVariant = cachedProduct.variants[0];
+          setSelectedVariant(firstVariant);
+          const opts: Record<string, string> = {};
+          firstVariant.options?.forEach(
+            (o: { option_group_id: string; option_value_id: string }) => {
+              opts[o.option_group_id] = o.option_value_id;
+            },
+          );
+          setSelectedOptions(opts);
+        }
+      }
+
+      if (cachedRelatedProducts) {
+        setRelated(cachedRelatedProducts);
+      }
+
+      // Still fetch fresh data in background
+      Promise.all([
+        api.get(`/products/${slug}`),
+        api.get(`/products/${slug}/related`),
+      ])
+        .then(([productRes, relatedRes]) => {
+          // Handle product data
+          if (productRes.data.success) {
+            setProduct(productRes.data.data);
+            cacheProduct(slug as string, productRes.data.data);
+            if (productRes.data.data.variants?.length > 0) {
+              const firstVariant = productRes.data.data.variants[0];
               setSelectedVariant(firstVariant);
               const opts: Record<string, string> = {};
               firstVariant.options?.forEach(
@@ -71,18 +107,17 @@ export default function ProductDetailPage() {
               setSelectedOptions(opts);
             }
           }
+
+          // Handle related products data
+          if (relatedRes.data.success) {
+            setRelated(relatedRes.data.data || []);
+            cacheRelated(slug as string, relatedRes.data.data || []);
+          }
         })
         .catch(() => {})
         .finally(() => setLoading(false));
-
-      api
-        .get(`/products/${slug}/related`)
-        .then(({ data }) => {
-          if (data.success) setRelated(data.data || []);
-        })
-        .catch(() => {});
     }
-  }, [slug]);
+  }, [slug, getCachedProduct, cacheProduct, getCachedRelated, cacheRelated]);
 
   const handleOptionChange = useCallback(
     (groupId: string, valueId: string) => {
