@@ -36,7 +36,10 @@ export function generateProductMessage(product: ProductInfo): string {
       ? Number(product.discount_price).toLocaleString("en-IN")
       : null;
 
-    if (discountPrice && Number(product.discount_price) < Number(product.price)) {
+    if (
+      discountPrice &&
+      Number(product.discount_price) < Number(product.price)
+    ) {
       // Show both prices when discount exists
       const discountPercent = Math.round(
         ((Number(product.price) - Number(product.discount_price)) /
