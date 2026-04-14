@@ -1,7 +1,7 @@
 "use client";
 
-import api from "@/lib/api";
 import { Category } from "@/lib/types";
+import { useCategoryStore } from "@/store";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -9,15 +9,19 @@ import { useEffect, useState } from "react";
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const { fetchCategories } = useCategoryStore();
 
   useEffect(() => {
-    api.get("/categories")
-      .then(({ data }) => {
-        if (data.success) setCategories(data.data || []);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    const loadCategories = async () => {
+      try {
+        const cachedCats = await fetchCategories();
+        setCategories(cachedCats);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCategories();
+  }, [fetchCategories]);
 
   if (loading) {
     return (
@@ -38,7 +42,9 @@ export default function CategoriesPage() {
 
       {categories.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-[var(--text-muted)] text-lg">No categories found</p>
+          <p className="text-[var(--text-muted)] text-lg">
+            No categories found
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">

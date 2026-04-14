@@ -3,7 +3,12 @@
 import api from "@/lib/api";
 import { Category, Product } from "@/lib/types";
 import { getProductImage } from "@/lib/utils";
-import { useAuthStore, useCartStore, useUIStore } from "@/store";
+import {
+  useAuthStore,
+  useCartStore,
+  useCategoryStore,
+  useUIStore,
+} from "@/store";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -44,6 +49,7 @@ export default function Navbar() {
 
   // data
   const [categories, setCategories] = useState<CatWithChildren[]>([]);
+  const { fetchCategories } = useCategoryStore();
 
   // desktop mega-menu
   const [megaOpen, setMegaOpen] = useState(false);
@@ -73,13 +79,14 @@ export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // ─── fetch categories ───
+  // ─── fetch categories with caching ───
   useEffect(() => {
-    api
-      .get("/categories")
-      .then(({ data }) => data.success && setCategories(data.data || []))
-      .catch(() => {});
-  }, []);
+    const loadCategories = async () => {
+      const cachedCats = await fetchCategories();
+      setCategories(cachedCats as CatWithChildren[]);
+    };
+    loadCategories();
+  }, [fetchCategories]);
 
   // ─── close everything on route change ───
   useEffect(() => {

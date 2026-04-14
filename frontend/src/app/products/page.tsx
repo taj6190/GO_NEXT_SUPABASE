@@ -5,6 +5,7 @@
 import ProductCard from "@/components/product/ProductCard";
 import api from "@/lib/api";
 import { Category, Product } from "@/lib/types";
+import { useCategoryStore } from "@/store";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronUp, Grid3X3, List, SlidersHorizontal, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -57,6 +58,7 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const [grid, setGrid] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const { fetchCategories } = useCategoryStore();
 
   const page = parseInt(searchParams.get("page") || "1");
   const search = searchParams.get("search") || "";
@@ -67,11 +69,12 @@ function ProductsContent() {
   const maxPrice = searchParams.get("max_price") || "";
 
   useEffect(() => {
-    api
-      .get("/categories")
-      .then(({ data }) => data.success && setCategories(data.data || []))
-      .catch(() => {});
-  }, []);
+    const loadCategories = async () => {
+      const cachedCats = await fetchCategories();
+      setCategories(cachedCats);
+    };
+    loadCategories();
+  }, [fetchCategories]);
 
   useEffect(() => {
     setLoading(true);

@@ -202,3 +202,56 @@ export const useUIStore = create<UIState>((set) => ({
   setSearchQuery: (q) => set({ searchQuery: q }),
   setBuyNowProduct: (product) => set({ buyNowProduct: product }),
 }));
+
+// Categories Store (Global Cache)
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  image_url?: string;
+  description?: string;
+  parent_id?: string;
+  children?: Category[];
+}
+
+interface CategoryState {
+  categories: Category[];
+  isLoading: boolean;
+  cachedAt: number | null;
+  fetchCategories: () => Promise<Category[]>;
+}
+
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+export const useCategoryStore = create<CategoryState>((set, get) => ({
+  categories: [],
+  isLoading: false,
+  cachedAt: null,
+
+  fetchCategories: async () => {
+    const state = get();
+
+    // Return cached data if still fresh
+    if (
+      state.categories.length > 0 &&
+      state.cachedAt &&
+      Date.now() - state.cachedAt < CACHE_TTL
+    ) {
+      return state.categories;
+    }
+
+    try {
+      set({ isLoading: true });
+      const { data } = await api.get("/categories");
+      if (data.success && data.data) {
+        set({ categories: data.data, cachedAt: Date.now(), isLoading: false });
+        return data.data;
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      set({ isLoading: false });
+    }
+
+    return state.categories;
+  },
+}));
